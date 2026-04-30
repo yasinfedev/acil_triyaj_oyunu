@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Final</title>
+    <title>Acil Triyaj Arcade</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         body {
-            background-color: #121212;
+            background-color: #1a1a1a;
+            /* Retro Acil Servis Atmosferi (Pixel Art Esintili) */
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('https://img.freepik.com/free-vector/hospital-hallway-concept-illustration_114360-14169.jpg'); /* Temsili soft görsel */
+            background-size: cover;
+            background-position: center;
             color: white;
             display: flex;
             flex-direction: column;
@@ -20,20 +28,30 @@
             touch-action: none;
         }
 
-        /* Üst Kontroller */
-        .top-difficulty {
-            margin-bottom: 10px;
-            display: flex;
-            gap: 5px;
+        /* Street Fighter Tarzı Başlık */
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 22px;
+            text-transform: uppercase;
+            font-style: italic;
+            color: #ffcc00;
+            text-shadow: 
+                3px 3px 0px #ff4500, 
+                6px 6px 0px #000;
+            margin-bottom: 15px;
+            transform: skew(-10deg);
+            letter-spacing: -1px;
+            text-align: center;
         }
 
         #game-container {
             position: relative;
-            border: 3px solid #333;
+            border: 4px solid #ffcc00;
             border-radius: 8px;
-            background-color: #000;
+            background-color: rgba(0, 0, 0, 0.85); /* Oyun alanı daha net */
             width: 95vw;
             max-width: 500px;
+            box-shadow: 0 0 20px #ff4500;
         }
 
         canvas { display: block; width: 100%; height: auto; }
@@ -41,24 +59,29 @@
         .ui-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            width: 100%;
             padding: 8px 15px;
-            font-size: 1.1rem;
-            background: #2c3e50;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            background: #222;
         }
 
-        /* Alt Butonlar - PC'de Yayılmaması İçin */
         .bottom-controls { 
             margin-top: 15px; 
             display: flex; 
             gap: 10px;
             width: 95vw;
-            max-width: 500px; /* PC'de yayılmayı önleyen kritik ayar */
-            justify-content: center;
+            max-width: 500px;
         }
 
-        .btn-custom { flex: 1; font-weight: bold; }
+        .share-btn { 
+            background: linear-gradient(to bottom, #ffcc00, #ff4500);
+            border: 2px solid #000;
+            color: white; 
+            font-weight: bold;
+            text-shadow: 1px 1px #000;
+            padding: 12px;
+            width: 80%;
+        }
 
         #game-over-overlay {
             position: absolute;
@@ -69,23 +92,16 @@
             justify-content: center;
             align-items: center;
             z-index: 20;
-            padding: 20px;
-            text-align: center;
         }
 
-        .share-btn { 
-            background-color: #25D366; border: none; color: white; 
-            padding: 12px; border-radius: 8px; font-weight: bold; 
-            margin-top: 10px; width: 80%;
-        }
-
-        .active-diff { border: 2px solid white !important; opacity: 1 !important; transform: scale(1.05); }
+        .active-diff { border: 2px solid white !important; opacity: 1 !important; }
     </style>
 </head>
 <body>
 
-    <!-- Zorluk Seçimi Üstte -->
-    <div class="top-difficulty">
+    <h1 class="game-title">ACİL TRİYAJ<br>ARCADE</h1>
+
+    <div class="mb-2">
         <button id="btn-easy" class="btn btn-sm btn-success active-diff" onclick="setDifficulty('easy')">KOLAY</button>
         <button id="btn-medium" class="btn btn-sm btn-warning" style="opacity:0.6" onclick="setDifficulty('medium')">ORTA</button>
         <button id="btn-hard" class="btn btn-sm btn-danger" style="opacity:0.6" onclick="setDifficulty('hard')">ZOR</button>
@@ -93,26 +109,23 @@
 
     <div id="game-container">
         <div class="ui-top">
-            <div>SÜRE: <span id="timer" style="color: #3498db;">0</span></div>
-            <div>PUAN: <span id="score" style="color: #f1c40f;">0</span></div>
-            <button id="muteToggle" class="btn btn-sm btn-outline-light" onclick="toggleMute()">🔊</button>
+            <div style="color: #00e5ff;">SÜRE:<span id="timer">0</span></div>
+            <div style="color: #ffcc00;">PUAN:<span id="score">0</span></div>
         </div>
         
         <canvas id="gameCanvas"></canvas>
 
         <div id="game-over-overlay">
-            <h2 class="text-danger">OYUN BİTTİ</h2>
-            <div id="final-result" class="fs-4 mb-4"></div>
+            <div class="game-title" style="font-size: 18px;">OYUN BİTTİ</div>
+            <div id="final-result" class="fs-4 mb-3" style="font-family: 'Press Start 2P'; font-size: 12px;"></div>
             <button class="btn btn-primary btn-lg mb-2 w-75" onclick="resetGame()">TEKRAR OYNA</button>
-            <button class="share-btn" onclick="generateAndShare()">SONUCU RESİM OLARAK PAYLAŞ 📱</button>
+            <button class="share-btn" onclick="generateAndShare()">SONUCU PAYLAŞ 📱</button>
         </div>
     </div>
 
-    <!-- Alt Butonlar -->
     <div class="bottom-controls">
-        <button id="startBtn" class="btn btn-success btn-custom" onclick="startGame()">BAŞLA</button>
-        <button id="endBtn" class="btn btn-danger btn-custom" onclick="endGame()">BİTİR</button>
-        <button class="btn btn-secondary btn-custom" onclick="resetGame()">RESTART</button>
+        <button id="startBtn" class="btn btn-success flex-grow-1 fw-bold" onclick="startGame()">BAŞLA</button>
+        <button id="endBtn" class="btn btn-danger flex-grow-1 fw-bold" onclick="endGame()">BİTİR</button>
     </div>
 
     <script>
@@ -123,47 +136,30 @@
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
 
-        let score = 0, time = 0, gameRunning = false, isMuted = false;
-        let animationId, timerInterval, patients = [];
+        let score = 0, time = 0, gameRunning = false;
+        let patients = [];
         let difficulty = 'easy';
-
-        // Ses Sistemi
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function toggleMute() { isMuted = !isMuted; document.getElementById('muteToggle').innerText = isMuted ? "🔇" : "🔊"; }
-        function playSound(freq, type, duration, vol) {
-            if (isMuted) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
-        }
+        let paddle = { width: 85, height: 16, x: 0, y: 0, speed: 15, dx: 0 };
 
         const difficultySettings = { easy: { blackChance: 0.002 }, medium: { blackChance: 0.009 }, hard: { blackChance: 0.025 } };
         const patientTypes = {
             GREEN: { color: '#00FF00', speed: 2.2, points: 5 },
             YELLOW: { color: '#FFFF00', speed: 3.5, points: 10 },
             RED: { color: '#FF0000', speed: 5.5, points: 20 },
-            BLACK: { color: '#333333', speed: 4.5, points: -15 }
+            BLACK: { color: '#444444', speed: 4.5, points: -15 }
         };
-
-        let paddle = { width: 85, height: 16, x: 0, y: 0, speed: 15, dx: 0 };
 
         function resizeCanvas() {
             const containerW = document.getElementById('game-container').clientWidth;
             canvas.width = containerW;
-            canvas.height = window.innerHeight * 0.55; 
-            paddle.y = canvas.height - 100;
+            canvas.height = window.innerHeight * 0.5; 
+            paddle.y = canvas.height - 80;
             paddle.x = (canvas.width / 2) - (paddle.width / 2);
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // PC Klavye Kontrolü (Geri Getirildi)
+        // Klavye
         document.addEventListener('keydown', e => {
             const key = e.key.toLowerCase();
             if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
@@ -171,13 +167,12 @@
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
 
-        // Mobil Dokunmatik Kontrol
+        // Dokunmatik
         canvas.addEventListener('touchmove', e => {
             e.preventDefault();
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            const touchX = (touch.clientX - rect.left) * (canvas.width / rect.width);
-            paddle.x = touchX - (paddle.width / 2);
+            paddle.x = (touch.clientX - rect.left) * (canvas.width / rect.width) - (paddle.width / 2);
             if (paddle.x < 0) paddle.x = 0;
             if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
         }, { passive: false });
@@ -185,12 +180,8 @@
         function setDifficulty(lvl) {
             if (gameRunning) return;
             difficulty = lvl;
-            document.querySelectorAll('.top-difficulty .btn').forEach(b => {
-                b.classList.remove('active-diff');
-                b.style.opacity = "0.6";
-            });
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-diff'));
             document.getElementById('btn-' + lvl).classList.add('active-diff');
-            document.getElementById('btn-' + lvl).style.opacity = "1";
         }
 
         function drawStretcher(x, y, w, h) {
@@ -206,126 +197,73 @@
             if(isEx) { ctx.fillStyle = "white"; ctx.font = "bold 13px Arial"; ctx.textAlign = "center"; ctx.fillText("X", x + 12, y + 27); }
         }
 
-        function createPatient() {
-            if (!gameRunning) return;
-            const keys = ['GREEN', 'YELLOW', 'RED'];
-            const typeKey = keys[Math.floor(Math.random() * keys.length)];
-            patients.push({
-                x: Math.random() * (canvas.width - 40) + 10,
-                y: -50, width: 25, height: 35,
-                type: { ...patientTypes[typeKey] },
-                isBlack: false,
-                activeZone: canvas.height * 0.4
-            });
-            setTimeout(createPatient, Math.max(400, 1150 - (time * 2)));
-        }
-
-        function draw() {
+        function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
-            
-            // PC Hareketi için DX eklemesi
             paddle.x += paddle.dx;
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            if (paddle.x < 0) paddle.x = 0; if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
 
             patients.forEach((p, i) => {
-                if (!p.isBlack && p.y > p.activeZone) {
-                    if (Math.random() < difficultySettings[difficulty].blackChance) { p.isBlack = true; p.type = { ...patientTypes.BLACK }; }
+                if (!p.isBlack && p.y > canvas.height * 0.4 && Math.random() < difficultySettings[difficulty].blackChance) {
+                    p.isBlack = true; p.type = { ...patientTypes.BLACK };
                 }
                 drawPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
-                if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
-                    if (p.isBlack) playSound(100, 'sawtooth', 0.2, 0.1); else playSound(600, 'sine', 0.1, 0.1);
+                if (p.y + 35 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + paddle.width) {
                     score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
-            animationId = requestAnimationFrame(draw);
+            requestAnimationFrame(update);
         }
 
         function startGame() {
             if (gameRunning) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             score = 0; time = 0; patients = [];
-            scoreEl.innerText = "0"; timerEl.innerText = "0";
-            overlay.style.display = 'none';
-            gameRunning = true;
+            overlay.style.display = 'none'; gameRunning = true;
             timerInterval = setInterval(() => { time++; timerEl.innerText = time; }, 1000);
-            createPatient(); draw();
+            spawn(); update();
+        }
+
+        function spawn() {
+            if (!gameRunning) return;
+            const keys = ['GREEN', 'YELLOW', 'RED'];
+            patients.push({ x: Math.random() * (canvas.width - 30), y: -50, type: { ...patientTypes[keys[Math.floor(Math.random() * 3)]] }, isBlack: false });
+            setTimeout(spawn, 1000);
         }
 
         function endGame() {
-            if (!gameRunning) return;
-            gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
-            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time} SANİYE`;
+            gameRunning = false; clearInterval(timerInterval);
+            finalResultEl.innerHTML = `SCORE: ${score}<br>TIME: ${time}s`;
             overlay.style.display = 'flex';
         }
 
-        function resetGame() {
-            cancelAnimationFrame(animationId); clearInterval(timerInterval);
-            gameRunning = false; startGame();
-        }
+        function resetGame() { endGame(); startGame(); }
 
-        // --- GELİŞMİŞ PAYLAŞIM: SKOR KARTI OLUŞTURMA ---
+        // --- SKOR KARTI TASARIMI (Street Fighter Style) ---
         function generateAndShare() {
-            // Geçici bir canvas oluştur (Skor Kartı için)
-            const tempCanvas = document.createElement('canvas');
-            const tCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = 500;
-            tempCanvas.height = 500;
-
-            // Arka Plan (Koyu Triyaj Teması)
-            tCtx.fillStyle = '#121212';
-            tCtx.fillRect(0, 0, 500, 500);
-            tCtx.strokeStyle = '#3498db';
-            tCtx.lineWidth = 10;
-            tCtx.strokeRect(5, 5, 490, 490);
-
-            // Başlık
-            tCtx.fillStyle = '#e74c3c';
-            tCtx.font = 'bold 50px Arial';
-            tCtx.textAlign = 'center';
-            tCtx.fillText('OYUN BİTTİ', 250, 100);
-
-            // Skor Bilgisi
-            tCtx.fillStyle = '#ffffff';
-            tCtx.font = '30px Arial';
-            tCtx.fillText('Triyaj Arcade Sonucu', 250, 180);
+            const tC = document.createElement('canvas'); const t = tC.getContext('2d');
+            tC.width = 500; tC.height = 500;
+            t.fillStyle = '#1a1a1a'; t.fillRect(0, 0, 500, 500);
             
-            tCtx.fillStyle = '#f1c40f';
-            tCtx.font = 'bold 80px Arial';
-            tCtx.fillText(score, 250, 300);
-            tCtx.font = '30px Arial';
-            tCtx.fillText('PUAN', 250, 340);
+            // SF Style Header in Image
+            t.save();
+            t.translate(250, 80); t.rotate(-0.1);
+            t.font = 'bold 45px Arial Black'; t.textAlign = 'center';
+            t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ', 4, 4);
+            t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ', 0, 0);
+            t.restore();
 
-            // Süre ve Zorluk
-            tCtx.fillStyle = '#3498db';
-            tCtx.font = '25px Arial';
-            tCtx.fillText(`Süre: ${time} Saniye`, 250, 420);
-            tCtx.fillStyle = '#95a5a6';
-            tCtx.fillText(`Zorluk: ${difficulty.toUpperCase()}`, 250, 460);
+            t.fillStyle = '#ffffff'; t.font = '30px Courier New'; t.fillText('ARCADE RESULTS', 250, 160);
+            t.fillStyle = '#ffcc00'; t.font = 'bold 90px Arial'; t.fillText(score, 250, 300);
+            t.font = '25px Arial'; t.fillText('POINTS', 250, 340);
+            t.fillStyle = '#3498db'; t.fillText(`${time} SECONDS - ${difficulty.toUpperCase()}`, 250, 420);
 
-            // Paylaşım Başlat
-            tempCanvas.toBlob(async (blob) => {
-                const file = new File([blob], 'triyaj_sonuc.png', { type: 'image/png' });
-                const shareData = {
-                    title: 'Triyaj Arcade Skorum',
-                    text: `Triyaj Arcade oyununda ${score} puan yaptım! Hadi gel beni geç.`,
-                    files: [file]
-                };
-
-                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-                    await navigator.share(shareData);
-                } else {
-                    // PC'deysen resmi indir
-                    const link = document.createElement('a');
-                    link.download = 'triyaj_skorum.png';
-                    link.href = tempCanvas.toDataURL();
-                    link.click();
-                    alert("Paylaşım desteklenmiyor, skor kartın indirildi!");
-                }
+            tC.toBlob(blob => {
+                const f = new File([blob], 'result.png', {type: 'image/png'});
+                if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Puanım: ${score}`, files: [f]});
+                else { const a = document.createElement('a'); a.download = 'score.png'; a.href = tC.toDataURL(); a.click(); }
             });
         }
     </script>
