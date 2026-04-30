@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acil Triyaj Arcade - Sesli Versiyon</title>
+    <title>Acil Triyaj Arcade - Ses Kontrollü</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -31,6 +31,7 @@
         .ui-top {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             width: 100%;
             padding: 10px 25px;
             font-size: 1.3rem;
@@ -38,6 +39,18 @@
             background: #2c3e50;
             border-bottom: 3px solid #34495e;
         }
+
+        .mute-btn {
+            background: none;
+            border: 1px solid #555;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .mute-btn:hover { background: #34495e; }
 
         .controls {
             margin-top: 15px;
@@ -76,6 +89,7 @@
         <div class="ui-top">
             <div>SÜRE: <span id="timer" style="color: #3498db;">0</span></div>
             <div>PUAN: <span id="score" style="color: #f1c40f;">0</span></div>
+            <button id="muteToggle" class="mute-btn" onclick="toggleMute()">🔊 SES AÇIK</button>
         </div>
         
         <canvas id="gameCanvas" width="600" height="500"></canvas>
@@ -108,15 +122,22 @@
         const timerEl = document.getElementById('timer');
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
+        const muteToggle = document.getElementById('muteToggle');
 
-        let score = 0, time = 0, gameRunning = false;
+        let score = 0, time = 0, gameRunning = false, isMuted = false;
         let animationId, timerInterval, patients = [];
         let difficulty = 'easy';
 
-        // --- SES EFEKTLERİ SİSTEMİ (Web Audio API) ---
+        // --- SES SİSTEMİ ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+        function toggleMute() {
+            isMuted = !isMuted;
+            muteToggle.innerText = isMuted ? "🔇 SES KAPALI" : "🔊 SES AÇIK";
+        }
+
         function playSound(freq, type, duration, vol) {
+            if (isMuted) return;
             const oscillator = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             oscillator.type = type;
@@ -130,30 +151,30 @@
         }
 
         const SFX = {
-            start: () => { playSound(440, 'square', 0.2, 0.1); setTimeout(() => playSound(880, 'square', 0.4, 0.1), 100); },
-            catch: () => playSound(600, 'sine', 0.1, 0.2),
-            error: () => { playSound(150, 'sawtooth', 0.3, 0.2); playSound(100, 'sawtooth', 0.3, 0.2); },
-            end: () => { playSound(300, 'triangle', 0.5, 0.2); playSound(200, 'triangle', 0.5, 0.2); }
+            start: () => { playSound(440, 'square', 0.2, 0.05); setTimeout(() => playSound(880, 'square', 0.4, 0.05), 100); },
+            catch: () => playSound(600, 'sine', 0.1, 0.1),
+            error: () => { playSound(150, 'sawtooth', 0.3, 0.1); playSound(100, 'sawtooth', 0.3, 0.1); },
+            end: () => { playSound(300, 'triangle', 0.5, 0.1); }
         };
 
-        // --- OYUN AYARLARI ---
+        // --- DENGELENMİŞ ZORLUKLAR ---
         const difficultySettings = {
-            easy: { blackChance: 0.003 },
-            medium: { blackChance: 0.015 },
-            hard: { blackChance: 0.04 }
+            easy: { blackChance: 0.002 },
+            medium: { blackChance: 0.008 },
+            hard: { blackChance: 0.025 } // Düşürüldü, daha oynanabilir
         };
 
         const paddle = {
-            width: 90, height: 16, // Sedye küçültüldü
+            width: 90, height: 16,
             x: 255, y: 460,
-            speed: 12, dx: 0
+            speed: 13, dx: 0
         };
 
         const patientTypes = {
             GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
             YELLOW: { color: '#FFFF00', speed: 4.0, points: 10 },
             RED: { color: '#FF0000', speed: 6.0, points: 20 },
-            BLACK: { color: '#333333', speed: 4.8, points: -15 }
+            BLACK: { color: '#444444', speed: 4.8, points: -15 }
         };
 
         function setDifficulty(lvl) {
@@ -220,7 +241,7 @@
                 isBlack: false,
                 activeZone: canvas.height * 0.45
             });
-            setTimeout(createPatient, Math.max(300, 1100 - (time * 2.5)));
+            setTimeout(createPatient, Math.max(300, 1100 - (time * 2)));
         }
 
         function draw() {
@@ -240,7 +261,6 @@
                 drawPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
 
-                // Yakalama Kontrolü
                 if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
                     if (p.isBlack) SFX.error(); else SFX.catch();
                     score += p.type.points;
