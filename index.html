@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acil Triyaj Arcade</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            border: 4px solid #333;
+            border-radius: 10px;
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .ui-top {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-custom {
+            padding: 10px 25px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .score-val { color: #ffca28; }
+        .timer-val { color: #00e5ff; }
+        
+        #game-over-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="ui-top">
+            <div>SÜRE: <span id="timer" class="timer-val">0</span></div>
+            <div>PUAN: <span id="score" class="score-val">0</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="600" height="500"></canvas>
+
+        <div id="game-over-overlay">
+            <h1 class="text-danger">OYUN BİTTİ!</h1>
+            <p id="final-result" class="fs-4"></p>
+            <button class="btn btn-primary" onclick="resetGame()">Yeniden Başla</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="startBtn" class="btn btn-success btn-custom" onclick="startGame()">BAŞLA</button>
+        <button id="endBtn" class="btn btn-danger btn-custom" onclick="endGame()">BİTİR</button>
+        <button class="btn btn-warning btn-custom" onclick="resetGame()">RESTART</button>
+    </div>
+
+    <div class="mt-3 text-secondary">
+        <small>Hareket: Ok Tuşları veya A-D | Siyah (Ex) hastaları yakalamayın!</small>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const overlay = document.getElementById('game-over-overlay');
+        const finalResultEl = document.getElementById('final-result');
+
+        // Oyun Değişkenleri
+        let score = 0;
+        let time = 0;
+        let gameRunning = false;
+        let animationId;
+        let timerInterval;
+        let patients = [];
+        
+        const paddle = {
+            width: 100,
+            height: 20,
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 30,
+            speed: 8,
+            dx: 0
+        };
+
+        const patientTypes = {
+            GREEN: { color: '#4caf50', speed: 2, points: 5, label: 'YEŞİL' },
+            YELLOW: { color: '#ffeb3b', speed: 3.5, points: 10, label: 'SARI' },
+            RED: { color: '#f44336', speed: 5, points: 20, label: 'KIRMIZI' },
+            BLACK: { color: '#000000', speed: 4, points: -15, label: 'EX' }
+        };
+
+        // Kontroller
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') paddle.dx = -paddle.speed;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') paddle.dx = paddle.speed;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D'].includes(e.key)) paddle.dx = 0;
+        });
+
+        function createPatient() {
+            if (!gameRunning) return;
+            
+            const types = ['GREEN', 'YELLOW', 'RED'];
+            const typeKey = types[Math.floor(Math.random() * types.length)];
+            const type = { ...patientTypes[typeKey] };
+
+            patients.push({
+                x: Math.random() * (canvas.width - 30),
+                y: -50,
+                width: 30,
+                height: 30,
+                type: type,
+                isBlack: false,
+                changeTime: Math.random() * 200 + 100 // Siyaha dönüşme eşiği (y ekseni)
+            });
+
+            setTimeout(createPatient, Math.random() * 1000 + 500);
+        }
+
+        function drawPaddle() {
+            // Sedye Barı
+            ctx.fillStyle = '#eee';
+            ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+            // Tekerlekler/Detay
+            ctx.fillStyle = '#555';
+            ctx.fillRect(paddle.x + 5, paddle.y + 20, 10, 5);
+            ctx.fillRect(paddle.x + paddle.width - 15, paddle.y + 20, 10, 5);
+        }
+
+        function drawPatients() {
+            patients.forEach((p, index) => {
+                // Spontan Siyaha Dönüşme Mantığı
+                if (!p.isBlack && p.y > p.changeTime && Math.random() < 0.01) {
+                    p.isBlack = true;
+                    p.type = { ...patientTypes.BLACK };
+                }
+
+                ctx.fillStyle = p.type.color;
+                ctx.beginPath();
+                ctx.roundRect(p.x, p.y, p.width, p.height, 5);
+                ctx.fill();
+                
+                // Kenarlık (Siyah hastalar için beyaz kenarlık görünürlük sağlar)
+                if(p.isBlack) {
+                    ctx.strokeStyle = "white";
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                }
+
+                p.y += p.type.speed;
+
+                // Çarpışma Kontrolü (Sedye yakaladı mı?)
+                if (
+                    p.y + p.height > paddle.y &&
+                    p.x + p.width > paddle.x &&
+                    p.x < paddle.x + paddle.width &&
+                    p.y < paddle.y + paddle.height
+                ) {
+                    score += p.type.points;
+                    scoreEl.innerText = score;
+                    patients.splice(index, 1);
+                }
+
+                // Ekrandan çıktı mı?
+                if (p.y > canvas.height) {
+                    patients.splice(index, 1);
+                }
+            });
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Paddle Hareketi
+            paddle.x += paddle.dx;
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+
+            drawPaddle();
+            drawPatients();
+
+            animationId = requestAnimationFrame(update);
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            overlay.style.display = 'none';
+            patients = [];
+            score = 0;
+            time = 0;
+            scoreEl.innerText = score;
+            timerEl.innerText = time;
+            
+            timerInterval = setInterval(() => {
+                time++;
+                timerEl.innerText = time;
+            }, 1000);
+
+            createPatient();
+            update();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            clearInterval(timerInterval);
+            finalResultEl.innerText = `Toplam Puan: ${score} | Süre: ${time} sn`;
+            overlay.style.display = 'block';
+        }
+
+        function resetGame() {
+            cancelAnimationFrame(animationId);
+            clearInterval(timerInterval);
+            gameRunning = false;
+            startGame();
+        }
+    </script>
+</body>
+</html>
