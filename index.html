@@ -3,116 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - 8-Bit Pro</title>
+    <title>Acil Triyaj Arcade - Retro Pixel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Pixel Font -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sf-yellow: #ffcc00;
-            --sf-orange: #ff4500;
-        }
-
+        :root { --sf-yellow: #ffcc00; --sf-orange: #ff4500; }
         body {
             background-color: #1a1a1a;
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
-                url('https://img.freepik.com/free-vector/hospital-hallway-concept-illustration_114360-14169.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            touch-action: none;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://img.freepik.com/free-vector/hospital-hallway-concept-illustration_114360-14169.jpg');
+            background-size: cover; background-position: center;
+            color: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; font-family: 'Press Start 2P', cursive; overflow: hidden; touch-action: none;
         }
-
         .game-title {
-            font-size: 20px;
-            font-style: italic;
-            color: var(--sf-yellow);
+            font-size: 18px; font-style: italic; color: var(--sf-yellow);
             text-shadow: 3px 3px 0px var(--sf-orange), 5px 5px 0px #000;
-            margin-bottom: 10px;
-            transform: skew(-10deg);
-            text-align: center;
-            line-height: 1.4;
+            margin-bottom: 10px; transform: skew(-10deg); text-align: center;
         }
-
         #game-container {
-            position: relative;
-            border: 4px solid var(--sf-yellow);
-            border-radius: 4px;
-            background-color: rgba(0, 0, 0, 0.9);
-            width: 95vw;
-            max-width: 500px;
+            position: relative; border: 4px solid var(--sf-yellow); border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.9); width: 95vw; max-width: 500px;
             box-shadow: 0 0 20px var(--sf-orange);
         }
-
-        canvas { display: block; width: 100%; height: auto; }
-
+        canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
         .ui-top {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            font-size: 10px;
-            background: #222;
-            border-bottom: 2px solid var(--sf-yellow);
+            display: flex; justify-content: space-between; padding: 10px; font-size: 9px;
+            background: #222; border-bottom: 2px solid var(--sf-yellow);
         }
-
-        .audio-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
         .pixel-btn {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-            border: 2px solid #000;
-            box-shadow: 2px 2px 0px #555;
-            padding: 8px 12px;
-            text-transform: uppercase;
-            transition: all 0.1s;
+            font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #000;
+            box-shadow: 2px 2px 0px #555; padding: 8px 10px; text-transform: uppercase; transition: 0.1s;
         }
-
-        .pixel-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 0px 0px 0px #000;
-        }
-
-        .btn-sf {
-            background: linear-gradient(to bottom, var(--sf-yellow), var(--sf-orange));
-            color: white;
-            text-shadow: 1px 1px #000;
-        }
-
-        .bottom-controls { 
-            margin-top: 15px; 
-            display: flex; 
-            flex-wrap: wrap;
-            gap: 8px;
-            width: 95vw;
-            max-width: 500px;
-            justify-content: center;
-        }
-
+        .pixel-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
+        .btn-sf { background: linear-gradient(to bottom, var(--sf-yellow), var(--sf-orange)); color: white; text-shadow: 1px 1px #000; }
+        .bottom-controls { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; width: 95vw; max-width: 500px; justify-content: center; }
         #game-over-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-            padding: 20px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 20; padding: 20px;
         }
-
         .active-diff { border: 2px solid white !important; opacity: 1 !important; transform: scale(1.1); }
     </style>
 </head>
@@ -120,9 +49,9 @@
 
     <h1 class="game-title">ACİL TRİYAJ<br>ARCADE</h1>
 
-    <div class="audio-controls">
-        <button id="sfxToggle" class="pixel-btn btn-secondary" onclick="toggleSFX()">SFX: ON</button>
-        <button id="musicToggle" class="pixel-btn btn-secondary" onclick="toggleMusic()">MUSIC: ON</button>
+    <div class="d-flex gap-2 mb-2">
+        <button id="sfxToggle" class="pixel-btn btn-secondary" onclick="toggleSFX()">EFEKT: AÇIK</button>
+        <button id="musicToggle" class="pixel-btn btn-secondary" onclick="toggleMusic()">MÜZİK: AÇIK</button>
     </div>
 
     <div class="mb-3 d-flex gap-2">
@@ -136,13 +65,11 @@
             <div style="color: #00e5ff;">SÜRE:<span id="timer">0</span></div>
             <div style="color: var(--sf-yellow);">PUAN:<span id="score">0</span></div>
         </div>
-        
         <canvas id="gameCanvas"></canvas>
-
         <div id="game-over-overlay">
             <div class="game-title" style="font-size: 16px;">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2;"></div>
-            <button class="pixel-btn btn-primary w-75 mb-2" onclick="resetGame()">YENİDEN DENE</button>
+            <button class="pixel-btn btn-primary w-75 mb-2" onclick="resetGame()">TEKRAR DENE</button>
             <button class="pixel-btn btn-sf w-75" onclick="generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
@@ -161,72 +88,82 @@
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
 
-        let score = 0, time = 0, gameRunning = false;
-        let sfxEnabled = true, musicEnabled = true;
+        let score = 0, time = 0, gameRunning = false, sfxEnabled = true, musicEnabled = true;
         let patients = [], animationId, timerInterval, musicInterval;
         let difficulty = 'easy';
-        let paddle = { width: 85, height: 16, x: 0, y: 0, speed: 16, dx: 0 };
+        let paddle = { width: 80, height: 16, x: 0, y: 0, speed: 16, dx: 0 };
 
-        const difficultySettings = { easy: { blackChance: 0.002 }, medium: { blackChance: 0.01 }, hard: { blackChance: 0.025 } };
+        const difficultySettings = { easy: { blackChance: 0.002, tr: 'KOLAY' }, medium: { blackChance: 0.01, tr: 'ORTA' }, hard: { blackChance: 0.025, tr: 'ZOR' } };
         const patientTypes = {
-            GREEN: { color: '#00FF00', speed: 2.2, points: 5 },
-            YELLOW: { color: '#FFFF00', speed: 3.5, points: 10 },
-            RED: { color: '#FF0000', speed: 5.5, points: 20 },
-            BLACK: { color: '#333333', speed: 4.5, points: -15 }
+            GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
+            YELLOW: { color: '#FFFF00', speed: 3.8, points: 10 },
+            RED: { color: '#FF0000', speed: 5.8, points: 20 },
+            BLACK: { color: '#333333', speed: 4.8, points: -15 }
         };
 
-        // --- SES SENTEZLEYİCİ (8-BIT) ---
+        // --- SES SİSTEMİ (MARIO TARZI) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
         function playNote(freq, type, duration, vol) {
-            if (!sfxEnabled && type !== 'triangle') return; // Müzik triangle kullanır
-            if (!musicEnabled && type === 'triangle') return;
-
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
-        const SFX = {
-            catch: () => playNote(600, 'square', 0.1, 0.1),
-            hitBlack: () => { playNote(150, 'sawtooth', 0.3, 0.2); playNote(100, 'sawtooth', 0.3, 0.2); },
-            start: () => { playNote(440, 'square', 0.2, 0.1); setTimeout(() => playNote(554, 'square', 0.2, 0.1), 100); },
-            end: () => playNote(200, 'square', 0.5, 0.1)
-        };
-
-        // 8-Bit Fon Müziği (Döngü)
-        function startMusic() {
-            if (musicInterval) clearInterval(musicInterval);
-            const melody = [261, 329, 392, 523, 392, 329];
-            let step = 0;
-            musicInterval = setInterval(() => {
-                if (gameRunning && musicEnabled) {
-                    playNote(melody[step % melody.length], 'triangle', 0.4, 0.03);
-                    step++;
-                }
-            }, 250);
+        function playMarioTheme() {
+            if (!gameRunning || !musicEnabled) return;
+            const tempo = 150;
+            const melody = [
+                {f: 659, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 523, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 783, d: 100}
+            ];
+            let i = 0;
+            const playNext = () => {
+                if (!gameRunning || !musicEnabled) return;
+                if (melody[i].f > 0) playNote(melody[i].f, 'square', melody[i].d/1000, 0.03);
+                setTimeout(() => { i = (i + 1) % melody.length; playNext(); }, melody[i].d + 50);
+            };
+            playNext();
         }
 
-        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `SFX: ${sfxEnabled ? 'ON' : 'OFF'}`; }
-        function toggleMusic() { musicEnabled = !musicEnabled; document.getElementById('musicToggle').innerText = `MUSIC: ${musicEnabled ? 'ON' : 'OFF'}`; }
+        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `EFEKT: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
+        function toggleMusic() { musicEnabled = !musicEnabled; document.getElementById('musicToggle').innerText = `MÜZİK: ${musicEnabled ? 'AÇIK' : 'KAPALI'}`; }
 
-        // --- OYUN MANTİĞİ ---
+        // --- PİXEL ÇİZİMLER ---
+        function drawPixelStretcher(x, y, w, h) {
+            ctx.fillStyle = "#FFF";
+            // Gövde (Bloklu)
+            ctx.fillRect(x + 20, y + 4, w - 20, 8);
+            ctx.fillRect(x + 4, y, 16, 4); // Baş yastığı
+            ctx.fillStyle = "#AAA";
+            ctx.fillRect(x + 20, y + 12, w - 20, 2); // İskelet
+            // Tekerlekler (Pixel)
+            ctx.fillStyle = "#555";
+            ctx.fillRect(x + 24, y + 14, 6, 6);
+            ctx.fillRect(x + w - 12, y + 14, 6, 6);
+        }
+
+        function drawPixelPerson(x, y, color, isEx) {
+            ctx.fillStyle = color;
+            // Kafa (4x4 blok)
+            ctx.fillRect(x + 8, y, 12, 12);
+            // Vücut (6x8 blok)
+            ctx.fillRect(x, y + 12, 28, 24);
+            if(isEx) {
+                ctx.fillStyle = "#FFF"; ctx.font = "bold 16px Arial";
+                ctx.fillText("X", x + 6, y + 30);
+            }
+        }
+
+        // --- OYUN DÖNGÜSÜ ---
         function resizeCanvas() {
             const containerW = document.getElementById('game-container').clientWidth;
-            canvas.width = containerW;
-            canvas.height = window.innerHeight * 0.5; 
-            paddle.y = canvas.height - 80;
-            paddle.x = (canvas.width / 2) - (paddle.width / 2);
+            canvas.width = containerW; canvas.height = window.innerHeight * 0.5;
+            paddle.y = canvas.height - 80; paddle.x = (canvas.width / 2) - (paddle.width / 2);
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
         document.addEventListener('keydown', e => {
             const key = e.key.toLowerCase();
@@ -235,55 +172,26 @@
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
 
-        canvas.addEventListener('touchmove', e => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            paddle.x = (touch.clientX - rect.left) * (canvas.width / rect.width) - (paddle.width / 2);
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
-        }, { passive: false });
-
-        function setDifficulty(lvl) {
-            if (gameRunning) return;
-            difficulty = lvl;
-            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
-            document.getElementById('btn-' + lvl).classList.add('active-diff');
-        }
-
-        function drawStretcher(x, y, w, h) {
-            ctx.fillStyle = "#FFF"; ctx.beginPath(); ctx.roundRect(x + 18, y, w - 18, h, 4);
-            ctx.moveTo(x, y - 10); ctx.lineTo(x + 22, y); ctx.lineTo(x + 22, y + h); ctx.lineTo(x + 5, y + h);
-            ctx.closePath(); ctx.fill();
-            ctx.fillStyle = "#555"; ctx.beginPath(); ctx.arc(x + 18, y + h + 4, 5, 0, Math.PI * 2); ctx.arc(x + w - 10, y + h + 4, 5, 0, Math.PI * 2); ctx.fill();
-        }
-
-        function drawPerson(x, y, color, isEx) {
-            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x + 12, y + 6, 7, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.roundRect(x + 5, y + 14, 14, 18, 4); ctx.fill();
-            if(isEx) { ctx.fillStyle = "white"; ctx.font = "bold 13px Arial"; ctx.textAlign = "center"; ctx.fillText("X", x + 12, y + 27); }
-        }
-
         function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
+            drawPixelStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
             paddle.x += paddle.dx;
-            if (paddle.x < 0) paddle.x = 0; if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
 
             patients.forEach((p, i) => {
                 if (!p.isBlack && p.y > canvas.height * 0.4 && Math.random() < difficultySettings[difficulty].blackChance) {
                     p.isBlack = true; p.type = { ...patientTypes.BLACK };
                 }
-                drawPerson(p.x, p.y, p.type.color, p.isBlack);
+                drawPixelPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
-                if (p.y + 35 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + paddle.width) {
-                    if (p.isBlack) SFX.hitBlack(); else SFX.catch();
+                if (p.y + 30 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + paddle.width) {
+                    if (sfxEnabled) playNote(p.isBlack ? 100 : 800, 'square', 0.1, 0.1);
                     score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
-            animationId = requestAnimationFrame(update);
+            requestAnimationFrame(update);
         }
 
         function spawn() {
@@ -296,47 +204,40 @@
         function startGame() {
             if (gameRunning) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            SFX.start();
-            startMusic();
-            score = 0; time = 0; patients = [];
-            overlay.style.display = 'none'; gameRunning = true;
+            gameRunning = true; score = 0; time = 0; patients = [];
+            overlay.style.display = 'none';
             timerInterval = setInterval(() => { time++; timerEl.innerText = time; }, 1000);
+            if (musicEnabled) playMarioTheme();
             spawn(); update();
         }
 
         function endGame() {
-            if (!gameRunning) return;
-            SFX.end();
-            gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
-            finalResultEl.innerHTML = `SCORE: ${score}<br>TIME: ${time}s<br>LEVEL: ${difficulty.toUpperCase()}`;
+            gameRunning = false; clearInterval(timerInterval);
+            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>ZORLUK: ${difficultySettings[difficulty].tr}`;
             overlay.style.display = 'flex';
         }
 
-        function resetGame() {
-            gameRunning = false;
-            clearInterval(timerInterval);
-            cancelAnimationFrame(animationId);
-            startGame();
+        function resetGame() { endGame(); setTimeout(startGame, 100); }
+
+        function setDifficulty(lvl) {
+            if (gameRunning) return;
+            difficulty = lvl;
+            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
+            document.getElementById('btn-' + lvl).classList.add('active-diff');
         }
 
         function generateAndShare() {
             const tC = document.createElement('canvas'); const t = tC.getContext('2d');
-            tC.width = 500; tC.height = 550;
-            t.fillStyle = '#1a1a1a'; t.fillRect(0, 0, 500, 550);
-            
-            t.save();
-            t.translate(250, 80); t.rotate(-0.05);
+            tC.width = 500; tC.height = 550; t.fillStyle = '#1a1a1a'; t.fillRect(0, 0, 500, 550);
+            t.save(); t.translate(250, 80); t.rotate(-0.05);
             t.font = 'bold 40px Arial Black'; t.textAlign = 'center';
             t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ', 4, 4);
-            t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ', 0, 0);
-            t.restore();
-
+            t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ', 0, 0); t.restore();
             t.fillStyle = '#ffcc00'; t.font = 'bold 100px Arial'; t.textAlign = 'center'; t.fillText(score, 250, 300);
-            t.fillStyle = '#ffffff'; t.font = '25px Courier New'; t.fillText('ARCADE SCORE', 250, 340);
-            t.fillStyle = '#3498db'; t.fillText(`TIME: ${time}s | LEVEL: ${difficulty.toUpperCase()}`, 250, 420);
-
+            t.fillStyle = '#ffffff'; t.font = '22px Courier New'; t.fillText('ARCADE SKORU', 250, 340);
+            t.fillStyle = '#3498db'; t.fillText(`${time} SANİYE - ${difficultySettings[difficulty].tr}`, 250, 420);
             tC.toBlob(blob => {
-                const f = new File([blob], 'triyaj_arcade.png', {type: 'image/png'});
+                const f = new File([blob], 'triyaj.png', {type: 'image/png'});
                 if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
                 else { const a = document.createElement('a'); a.download = 'score.png'; a.href = tC.toDataURL(); a.click(); }
             });
