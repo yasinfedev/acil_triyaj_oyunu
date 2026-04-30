@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acil Triyaj Arcade - Saf Renk Modu</title>
+    <title>Acil Triyaj Arcade - Sesli Versiyon</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -32,8 +32,8 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 12px 25px;
-            font-size: 1.5rem;
+            padding: 10px 25px;
+            font-size: 1.3rem;
             font-weight: bold;
             background: #2c3e50;
             border-bottom: 3px solid #34495e;
@@ -113,23 +113,47 @@
         let animationId, timerInterval, patients = [];
         let difficulty = 'easy';
 
+        // --- SES EFEKTLERİ SİSTEMİ (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(freq, type, duration, vol) {
+            const oscillator = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.connect(gain);
+            gain.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        const SFX = {
+            start: () => { playSound(440, 'square', 0.2, 0.1); setTimeout(() => playSound(880, 'square', 0.4, 0.1), 100); },
+            catch: () => playSound(600, 'sine', 0.1, 0.2),
+            error: () => { playSound(150, 'sawtooth', 0.3, 0.2); playSound(100, 'sawtooth', 0.3, 0.2); },
+            end: () => { playSound(300, 'triangle', 0.5, 0.2); playSound(200, 'triangle', 0.5, 0.2); }
+        };
+
+        // --- OYUN AYARLARI ---
         const difficultySettings = {
             easy: { blackChance: 0.003 },
-            medium: { blackChance: 0.012 },
-            hard: { blackChance: 0.035 }
+            medium: { blackChance: 0.015 },
+            hard: { blackChance: 0.04 }
         };
 
         const paddle = {
-            width: 130, height: 20,
-            x: 235, y: 460,
-            speed: 11, dx: 0
+            width: 90, height: 16, // Sedye küçültüldü
+            x: 255, y: 460,
+            speed: 12, dx: 0
         };
 
         const patientTypes = {
-            GREEN: { color: '#00FF00', speed: 2.2, points: 5 },
-            YELLOW: { color: '#FFFF00', speed: 3.8, points: 10 },
-            RED: { color: '#FF0000', speed: 5.8, points: 20 },
-            BLACK: { color: '#333333', speed: 4.5, points: -15 }
+            GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
+            YELLOW: { color: '#FFFF00', speed: 4.0, points: 10 },
+            RED: { color: '#FF0000', speed: 6.0, points: 20 },
+            BLACK: { color: '#333333', speed: 4.8, points: -15 }
         };
 
         function setDifficulty(lvl) {
@@ -147,48 +171,41 @@
         document.addEventListener('keyup', () => paddle.dx = 0);
 
         function drawStretcher(x, y, w, h) {
-            // Tekerlekler
             ctx.fillStyle = "#555";
             ctx.beginPath();
-            ctx.arc(x + 25, y + h + 5, 6, 0, Math.PI * 2);
-            ctx.arc(x + w - 25, y + h + 5, 6, 0, Math.PI * 2);
+            ctx.arc(x + 15, y + h + 4, 5, 0, Math.PI * 2);
+            ctx.arc(x + w - 15, y + h + 4, 5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Sedye Şiltesi
             ctx.fillStyle = "#FFFFFF";
             ctx.beginPath();
-            ctx.roundRect(x + 30, y, w - 30, h, 5);
-            ctx.moveTo(x, y - 12);
-            ctx.lineTo(x + 35, y);
-            ctx.lineTo(x + 35, y + h);
+            ctx.roundRect(x + 20, y, w - 20, h, 4);
+            ctx.moveTo(x, y - 10);
+            ctx.lineTo(x + 25, y);
+            ctx.lineTo(x + 25, y + h);
             ctx.lineTo(x + 5, y + h);
             ctx.closePath();
             ctx.fill();
             
-            // Alt İskelet
             ctx.strokeStyle = "#95a5a6";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x + 30, y + h - 5, w - 30, 3);
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 20, y + h - 4, w - 20, 2);
         }
 
-        // Kendi "Person" İkonumuzu Çiziyoruz
         function drawPerson(x, y, color, isEx) {
             ctx.fillStyle = color;
-            
-            // Kafa
             ctx.beginPath();
-            ctx.arc(x + 20, y + 10, 8, 0, Math.PI * 2);
+            ctx.arc(x + 15, y + 8, 7, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Vücut
             ctx.beginPath();
-            ctx.roundRect(x + 10, y + 20, 20, 25, 5);
+            ctx.roundRect(x + 7, y + 16, 16, 20, 4);
             ctx.fill();
 
             if(isEx) {
                 ctx.fillStyle = "white";
-                ctx.font = "bold 20px Arial";
-                ctx.fillText("X", x + 12, y + 20);
+                ctx.font = "bold 16px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("X", x + 15, y + 30);
             }
         }
 
@@ -197,13 +214,13 @@
             const keys = ['GREEN', 'YELLOW', 'RED'];
             const typeKey = keys[Math.floor(Math.random() * keys.length)];
             patients.push({
-                x: Math.random() * (canvas.width - 50) + 10,
-                y: -60, width: 40, height: 50,
+                x: Math.random() * (canvas.width - 40) + 10,
+                y: -50, width: 30, height: 40,
                 type: { ...patientTypes[typeKey] },
                 isBlack: false,
                 activeZone: canvas.height * 0.45
             });
-            setTimeout(createPatient, Math.max(300, 1100 - (time * 2)));
+            setTimeout(createPatient, Math.max(300, 1100 - (time * 2.5)));
         }
 
         function draw() {
@@ -220,13 +237,12 @@
                     }
                 }
 
-                // Çizim
                 drawPerson(p.x, p.y, p.type.color, p.isBlack);
-
                 p.y += p.type.speed;
 
-                // Yakalama
+                // Yakalama Kontrolü
                 if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
+                    if (p.isBlack) SFX.error(); else SFX.catch();
                     score += p.type.points;
                     scoreEl.innerText = score;
                     patients.splice(i, 1);
@@ -243,6 +259,8 @@
 
         function startGame() {
             if (gameRunning) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            SFX.start();
             score = 0; time = 0; patients = [];
             scoreEl.innerText = "0"; timerEl.innerText = "0";
             overlay.style.display = 'none';
@@ -254,6 +272,7 @@
 
         function endGame() {
             if (!gameRunning) return;
+            SFX.end();
             gameRunning = false;
             clearInterval(timerInterval);
             cancelAnimationFrame(animationId);
