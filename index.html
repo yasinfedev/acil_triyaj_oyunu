@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Mobil Uyumlu</title>
+    <title>Acil Triyaj Arcade - Social Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -17,7 +17,7 @@
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            touch-action: none; /* Sayfa kaydırmayı engeller */
+            touch-action: none;
         }
 
         #game-container {
@@ -25,16 +25,11 @@
             border: 3px solid #333;
             border-radius: 8px;
             background-color: #000;
-            width: 95vw; /* Mobil için genişlik */
+            width: 95vw;
             max-width: 600px;
         }
 
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: auto; 
-            touch-action: none;
-        }
+        canvas { display: block; width: 100%; height: auto; }
 
         .ui-top {
             display: flex;
@@ -43,44 +38,10 @@
             width: 100%;
             padding: 8px 15px;
             font-size: 1.1rem;
-            font-weight: bold;
             background: #2c3e50;
-            border-bottom: 2px solid #34495e;
         }
 
-        .mute-btn {
-            background: none;
-            border: 1px solid #555;
-            color: white;
-            padding: 1px 8px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-        }
-
-        .controls {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .difficulty-buttons .btn {
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            opacity: 0.5;
-        }
-
-        .difficulty-buttons .active {
-            opacity: 1;
-            border: 1px solid white;
-        }
-
-        .main-buttons .btn {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-        }
+        .controls { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
         #game-over-overlay {
             position: absolute;
@@ -91,17 +52,19 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            text-align: center;
+            padding: 20px;
         }
+
+        .share-btn { background-color: #25D366; border: none; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         <div class="ui-top">
-            <div>S: <span id="timer" style="color: #3498db;">0</span></div>
-            <div>P: <span id="score" style="color: #f1c40f;">0</span></div>
-            <button id="muteToggle" class="mute-btn" onclick="toggleMute()">🔊</button>
+            <div>SÜRE: <span id="timer" style="color: #3498db;">0</span></div>
+            <div>PUAN: <span id="score" style="color: #f1c40f;">0</span></div>
+            <button id="muteToggle" class="btn btn-sm btn-outline-light" onclick="toggleMute()">🔊</button>
         </div>
         
         <canvas id="gameCanvas"></canvas>
@@ -109,20 +72,19 @@
         <div id="game-over-overlay">
             <h2 class="text-danger">OYUN BİTTİ</h2>
             <p id="final-result" class="fs-5 mb-3"></p>
-            <button class="btn btn-primary" onclick="resetGame()">Yeniden Başla</button>
+            <button class="btn btn-primary mb-2 w-100" onclick="resetGame()">Yeniden Başla</button>
+            <button class="share-btn w-100" onclick="shareScore()">SONUCU PAYLAŞ (Resim)</button>
         </div>
     </div>
 
     <div class="controls">
         <div class="difficulty-buttons">
-            <button id="btn-easy" class="btn btn-success active" onclick="setDifficulty('easy')">KOLAY</button>
-            <button id="btn-medium" class="btn btn-warning" onclick="setDifficulty('medium')">ORTA</button>
-            <button id="btn-hard" class="btn btn-danger" onclick="setDifficulty('hard')">ZOR</button>
+            <button id="btn-easy" class="btn btn-sm btn-success active" onclick="setDifficulty('easy')">KOLAY</button>
+            <button id="btn-medium" class="btn btn-sm btn-warning" onclick="setDifficulty('medium')">ORTA</button>
+            <button id="btn-hard" class="btn btn-sm btn-danger" onclick="setDifficulty('hard')">ZOR</button>
         </div>
-
         <div class="main-buttons">
-            <button id="startBtn" class="btn btn-success" onclick="startGame()">BAŞLA</button>
-            <button id="endBtn" class="btn btn-danger" onclick="endGame()">BİTİR</button>
+            <button id="startBtn" class="btn btn-success px-4" onclick="startGame()">BAŞLA</button>
             <button class="btn btn-secondary" onclick="resetGame()">RESTART</button>
         </div>
     </div>
@@ -139,26 +101,22 @@
         let animationId, timerInterval, patients = [];
         let difficulty = 'easy';
 
-        // Ses Sistemi
+        // Parmak kapatmasın diye offset değeri (Sedye parmağın 60px yukarısında olacak)
+        const touchOffset = 60;
+
+        // Ses Sistemi (Web Audio API)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function toggleMute() { isMuted = !isMuted; muteToggle.innerText = isMuted ? "🔇" : "🔊"; }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('muteToggle').innerText = isMuted ? "🔇" : "🔊"; }
         function playSound(freq, type, duration, vol) {
             if (isMuted) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
-        const SFX = {
-            start: () => { playSound(440, 'square', 0.2, 0.05); },
-            catch: () => playSound(600, 'sine', 0.1, 0.1),
-            error: () => playSound(100, 'sawtooth', 0.3, 0.1),
-            end: () => playSound(200, 'triangle', 0.5, 0.1)
-        };
 
         const difficultySettings = { easy: { blackChance: 0.002 }, medium: { blackChance: 0.008 }, hard: { blackChance: 0.022 } };
         const patientTypes = {
@@ -174,28 +132,20 @@
             const containerW = document.getElementById('game-container').clientWidth;
             canvas.width = containerW;
             canvas.height = window.innerHeight * 0.6; 
-            paddle.y = canvas.height - 40;
+            paddle.y = canvas.height - 100; // Sedyeyi biraz yukarı çektik (parmak payı)
             paddle.x = (canvas.width / 2) - (paddle.width / 2);
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-
-        // Klavye Kontrol
-        document.addEventListener('keydown', e => {
-            const key = e.key.toLowerCase();
-            if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
-            if (key === 'arrowright' || key === 'd') paddle.dx = paddle.speed;
-        });
-        document.addEventListener('keyup', () => paddle.dx = 0);
 
         // Dokunmatik Kontrol (Touch)
         canvas.addEventListener('touchmove', e => {
             e.preventDefault();
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            const touchX = touch.clientX - rect.left;
+            // x koordinatını al, y koordinatına dokunmaya gerek yok çünkü sedye sadece yatay gider
+            const touchX = (touch.clientX - rect.left) * (canvas.width / rect.width);
             paddle.x = touchX - (paddle.width / 2);
-            // Sınırlandırma
             if (paddle.x < 0) paddle.x = 0;
             if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
         }, { passive: false });
@@ -208,25 +158,16 @@
         }
 
         function drawStretcher(x, y, w, h) {
-            ctx.fillStyle = "#FFFFFF";
-            ctx.beginPath();
-            ctx.roundRect(x + 15, y, w - 15, h, 4);
+            ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.roundRect(x + 15, y, w - 15, h, 4);
             ctx.moveTo(x, y - 8); ctx.lineTo(x + 20, y); ctx.lineTo(x + 20, y + h); ctx.lineTo(x + 5, y + h);
             ctx.closePath(); ctx.fill();
-            ctx.fillStyle = "#555";
-            ctx.beginPath();
-            ctx.arc(x + 15, y + h + 3, 4, 0, Math.PI * 2); ctx.arc(x + w - 10, y + h + 3, 4, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = "#555"; ctx.beginPath(); ctx.arc(x + 15, y + h + 3, 4, 0, Math.PI * 2); ctx.arc(x + w - 10, y + h + 3, 4, 0, Math.PI * 2); ctx.fill();
         }
 
         function drawPerson(x, y, color, isEx) {
-            ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(x + 12, y + 6, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x + 12, y + 6, 6, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.roundRect(x + 6, y + 13, 12, 16, 3); ctx.fill();
-            if(isEx) {
-                ctx.fillStyle = "white"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
-                ctx.fillText("X", x + 12, y + 25);
-            }
+            if(isEx) { ctx.fillStyle = "white"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center"; ctx.fillText("X", x + 12, y + 25); }
         }
 
         function createPatient() {
@@ -238,7 +179,7 @@
                 y: -40, width: 25, height: 35,
                 type: { ...patientTypes[typeKey] },
                 isBlack: false,
-                activeZone: canvas.height * 0.45
+                activeZone: canvas.height * 0.4
             });
             setTimeout(createPatient, Math.max(400, 1200 - (time * 2)));
         }
@@ -247,59 +188,65 @@
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
-
             patients.forEach((p, i) => {
                 if (!p.isBlack && p.y > p.activeZone) {
-                    if (Math.random() < difficultySettings[difficulty].blackChance) {
-                        p.isBlack = true; p.type = { ...patientTypes.BLACK };
-                    }
+                    if (Math.random() < difficultySettings[difficulty].blackChance) { p.isBlack = true; p.type = { ...patientTypes.BLACK }; }
                 }
                 drawPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
                 if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
-                    if (p.isBlack) SFX.error(); else SFX.catch();
-                    score += p.type.points; scoreEl.innerText = score;
-                    patients.splice(i, 1);
+                    if (p.isBlack) playSound(100, 'sawtooth', 0.3, 0.1); else playSound(600, 'sine', 0.1, 0.1);
+                    score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
-
-            if (paddle.dx !== 0) {
-                paddle.x += paddle.dx;
-                if (paddle.x < 0) paddle.x = 0;
-                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
-            }
             animationId = requestAnimationFrame(draw);
         }
 
         function startGame() {
             if (gameRunning) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            SFX.start();
             score = 0; time = 0; patients = [];
             scoreEl.innerText = "0"; timerEl.innerText = "0";
             overlay.style.display = 'none';
             gameRunning = true;
             timerInterval = setInterval(() => { time++; timerEl.innerText = time; }, 1000);
-            createPatient();
-            draw();
+            createPatient(); draw();
         }
 
         function endGame() {
             if (!gameRunning) return;
-            SFX.end();
-            gameRunning = false;
-            clearInterval(timerInterval);
-            cancelAnimationFrame(animationId);
+            gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
             finalResultEl.innerHTML = `Puan: ${score}<br>Süre: ${time} sn`;
             overlay.style.display = 'flex';
         }
 
         function resetGame() {
-            cancelAnimationFrame(animationId);
-            clearInterval(timerInterval);
-            gameRunning = false;
-            startGame();
+            cancelAnimationFrame(animationId); clearInterval(timerInterval);
+            gameRunning = false; startGame();
+        }
+
+        // PAYLAŞIM FONKSİYONU
+        async function shareScore() {
+            // Oyun alanının o anki görüntüsünü al
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'triyaj_skor.png', { type: 'image/png' });
+                const shareData = {
+                    title: 'Acil Triyaj Arcade Skorum',
+                    text: `Triyaj Arcade oyununda ${score} puan yaptım! Hadi sen de dene.`,
+                    files: [file]
+                };
+
+                if (navigator.canShare && navigator.canShare(shareData)) {
+                    try {
+                        await navigator.share(shareData);
+                    } catch (err) {
+                        console.log('Paylaşım iptal edildi veya hata oluştu:', err);
+                    }
+                } else {
+                    alert("Tarayıcınız dosya paylaşımını desteklemiyor. Skoru ekran görüntüsü alarak paylaşabilirsiniz.");
+                }
+            });
         }
     </script>
 </body>
