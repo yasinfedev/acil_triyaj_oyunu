@@ -6,9 +6,6 @@
 
 **Acil Triyaj Arcade**, acil servis triyaj mantığını Street Fighter tarzı retro arcade mekanikleriyle birleştiren bir web uygulamasıdır. Uzm. Dr. Yasin Yıldız tarafından geliştirilen bu oyun, hem reflekslerinizi test eder hem de kaotik bir acil servis atmosferinde doğru karar verme yetinizi ölçer.
 
-## 📸 Ekran Görüntüsü
-
-![Acil Triyaj Arcade](https://acil42.com/wp-content/uploads/2026/05/Ekran-Resmi-2026-05-01-00.57.59.png)![Acil Triyaj Arcade Ekran Görüntüsü](Ekran-Resmi-2026-05-01-00.57.59.png)
 ---
 
 ## 🚀 Özellikler
