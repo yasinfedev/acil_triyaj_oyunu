@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acil Triyaj Arcade - Stretcher Edition</title>
+    <title>Acil Triyaj Arcade v1.7 - Net Görünüm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #121212;
+            background-color: #1a1a1a;
             color: white;
             display: flex;
             flex-direction: column;
@@ -21,10 +21,9 @@
 
         #game-container {
             position: relative;
-            border: 4px solid #333;
-            border-radius: 12px;
-            background-color: #050505;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+            border: 4px solid #444;
+            border-radius: 8px;
+            background-color: #000;
         }
 
         canvas { display: block; }
@@ -33,48 +32,42 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 12px 25px;
+            padding: 10px 20px;
             font-size: 1.4rem;
             font-weight: bold;
-            background: #2c3e50;
-            border-bottom: 3px solid #34495e;
-            border-radius: 8px 8px 0 0;
+            background: #333;
+            border-bottom: 2px solid #555;
         }
 
         .controls {
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .difficulty-buttons .btn {
             margin: 0 5px;
-            opacity: 0.4;
-            transition: 0.3s;
+            opacity: 0.6;
             font-weight: bold;
         }
 
         .difficulty-buttons .active {
             opacity: 1;
             border: 2px solid white;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
-        .score-val { color: #f1c40f; }
-        .timer-val { color: #3498db; }
-        
         #game-over-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            text-align: center;
         }
     </style>
 </head>
@@ -82,22 +75,21 @@
 
     <div id="game-container">
         <div class="ui-top">
-            <div>SÜRE: <span id="timer" class="timer-val">0</span></div>
-            <div>PUAN: <span id="score" class="score-val">0</span></div>
+            <div>SÜRE: <span id="timer" style="color: #00e5ff;">0</span></div>
+            <div>PUAN: <span id="score" style="color: #ffca28;">0</span></div>
         </div>
         
         <canvas id="gameCanvas" width="600" height="500"></canvas>
 
         <div id="game-over-overlay">
-            <h1 class="text-danger mb-2">EKSİTUS / OYUN BİTTİ</h1>
+            <h1 class="text-danger mb-2">OYUN BİTTİ</h1>
             <p id="final-result" class="fs-4 mb-4"></p>
-            <button class="btn btn-lg btn-primary px-5" onclick="resetGame()">Yeniden Dene</button>
+            <button class="btn btn-lg btn-primary px-5" onclick="resetGame()">Yeniden Başla</button>
         </div>
     </div>
 
     <div class="controls">
         <div class="difficulty-buttons">
-            <span class="me-2">Zorluk:</span>
             <button id="btn-easy" class="btn btn-success active" onclick="setDifficulty('easy')">KOLAY</button>
             <button id="btn-medium" class="btn btn-warning" onclick="setDifficulty('medium')">ORTA</button>
             <button id="btn-hard" class="btn btn-danger" onclick="setDifficulty('hard')">ZOR</button>
@@ -120,25 +112,25 @@
 
         let score = 0, time = 0, gameRunning = false;
         let animationId, timerInterval, patients = [];
-        
         let difficulty = 'easy';
+
         const difficultySettings = {
-            easy: { blackChance: 0.003, label: 'Kolay' },
-            medium: { blackChance: 0.012, label: 'Orta' },
-            hard: { blackChance: 0.035, label: 'Zor' }
+            easy: { blackChance: 0.002 },
+            medium: { blackChance: 0.01 },
+            hard: { blackChance: 0.03 }
         };
 
         const paddle = {
-            width: 130, height: 25,
-            x: 235, y: 460,
+            width: 120, height: 40, // Yüksekliği baş kısmı için artırdık
+            x: 240, y: 440,
             speed: 10, dx: 0
         };
 
         const patientTypes = {
-            GREEN: { color: '#2ecc71', speed: 2.3, points: 5 },
-            YELLOW: { color: '#f1c40f', speed: 3.8, points: 10 },
-            RED: { color: '#e74c3c', speed: 5.8, points: 20 },
-            BLACK: { color: '#333', speed: 4.5, points: -15 }
+            GREEN: { color: '#00FF00', speed: 2.5, points: 5 },
+            YELLOW: { color: '#FFFF00', speed: 4, points: 10 },
+            RED: { color: '#FF0000', speed: 6, points: 20 },
+            BLACK: { color: '#555555', speed: 4.5, points: -15 }
         };
 
         function setDifficulty(lvl) {
@@ -149,58 +141,50 @@
         }
 
         document.addEventListener('keydown', e => {
-            const key = e.key.toLowerCase();
-            if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
-            if (key === 'arrowright' || key === 'd') paddle.dx = paddle.speed;
+            if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') paddle.dx = -paddle.speed;
+            if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') paddle.dx = paddle.speed;
         });
+        document.addEventListener('keyup', () => paddle.dx = 0);
 
-        document.addEventListener('keyup', e => {
-            const key = e.key.toLowerCase();
-            if (['arrowleft', 'arrowright', 'a', 'd'].includes(key)) paddle.dx = 0;
-        });
+        function drawStretcher(x, y, w, h) {
+            // Tekerlekler
+            ctx.fillStyle = "#777";
+            ctx.beginPath();
+            ctx.arc(x + 35, y + 35, 6, 0, Math.PI * 2);
+            ctx.arc(x + w - 20, y + 35, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sedye İskeleti (Koyu Gri)
+            ctx.strokeStyle = "#999";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x + 20, y + 25, w - 30, 5);
+
+            // Sedye Üst Kısmı (Yatak/Şilte)
+            ctx.fillStyle = "#FFFFFF";
+            
+            // Ana Yatak
+            ctx.fillRect(x + 30, y + 15, w - 40, 10);
+            
+            // Baş Kısmı (Kalkık Duruş - Çapraz dikdörtgen)
+            ctx.save();
+            ctx.translate(x + 30, y + 15);
+            ctx.rotate(-Math.PI / 4); // 45 derece yukarı kaldır
+            ctx.fillRect(-25, 0, 35, 10);
+            ctx.restore();
+        }
 
         function createPatient() {
             if (!gameRunning) return;
             const keys = ['GREEN', 'YELLOW', 'RED'];
             const typeKey = keys[Math.floor(Math.random() * keys.length)];
             patients.push({
-                x: Math.random() * (canvas.width - 50) + 10,
+                x: Math.random() * (canvas.width - 40) + 10,
                 y: -50, width: 40, height: 40,
                 type: { ...patientTypes[typeKey] },
                 isBlack: false,
-                activeZone: canvas.height * 0.45
+                changeZone: canvas.height * 0.5
             });
-            setTimeout(createPatient, Math.max(300, 1000 - (time * 3)));
-        }
-
-        function drawStretcher(x, y, w, h) {
-            // 1. Tekerlekler
-            ctx.fillStyle = "#555";
-            ctx.beginPath();
-            ctx.arc(x + 25, y + h + 5, 6, 0, Math.PI * 2);
-            ctx.arc(x + w - 25, y + h + 5, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 2. Ana Gövde (Sedye şiltesi)
-            ctx.fillStyle = "#ecf0f1";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "rgba(255,255,255,0.3)";
-            ctx.beginPath();
-            // Gövde kısmı
-            ctx.roundRect(x + 30, y, w - 30, h, 5);
-            // Baş kısmı (eğimli/kalkık)
-            ctx.moveTo(x, y - 15);
-            ctx.lineTo(x + 35, y);
-            ctx.lineTo(x + 35, y + h);
-            ctx.lineTo(x + 5, y + h);
-            ctx.closePath();
-            ctx.fill();
-            
-            // 3. Metal İskelet Detayı
-            ctx.strokeStyle = "#95a5a6";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x + 30, y + h - 5, w - 30, 3);
-            ctx.shadowBlur = 0;
+            setTimeout(createPatient, Math.max(350, 1100 - (time * 2)));
         }
 
         function draw() {
@@ -210,34 +194,33 @@
             drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
 
             patients.forEach((p, i) => {
-                if (!p.isBlack && p.y > p.activeZone) {
+                // Siyah dönüşüm (Glowsuz, Net renk değişimi)
+                if (!p.isBlack && p.y > p.changeZone) {
                     if (Math.random() < difficultySettings[difficulty].blackChance) {
                         p.isBlack = true;
                         p.type = { ...patientTypes.BLACK };
                     }
                 }
 
+                // İkon Çizimi (Glow kapatıldı)
+                ctx.shadowBlur = 0; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = p.isBlack ? "red" : p.type.color;
-                ctx.fillStyle = p.isBlack ? "#222" : p.type.color;
+                ctx.font = "42px serif";
+                ctx.fillStyle = p.type.color;
                 
-                ctx.font = "40px serif";
                 ctx.fillText("👤", p.x + p.width/2, p.y + p.height/2);
 
                 if(p.isBlack) {
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = "red";
-                    ctx.font = "bold 20px Arial";
-                    ctx.fillText("✘", p.x + p.width/2, p.y - 12);
+                    ctx.fillStyle = "white";
+                    ctx.font = "bold 24px Arial";
+                    ctx.fillText("✘", p.x + p.width/2, p.y - 15);
                 }
 
-                ctx.shadowBlur = 0;
                 p.y += p.type.speed;
 
-                // Yakalama (Collision)
-                if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
+                // Yakalama (Sadece sedyenin üst yüzeyiyle temas)
+                if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + 25) {
                     score += p.type.points;
                     scoreEl.innerText = score;
                     patients.splice(i, 1);
@@ -268,7 +251,7 @@
             gameRunning = false;
             clearInterval(timerInterval);
             cancelAnimationFrame(animationId);
-            finalResultEl.innerHTML = `Mod: ${difficultySettings[difficulty].label} | Puan: ${score} | Süre: ${time} sn`;
+            finalResultEl.innerHTML = `Puan: ${score}<br>Süre: ${time} sn`;
             overlay.style.display = 'flex';
         }
 
