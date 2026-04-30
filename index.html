@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acil Triyaj Arcade - Ses Kontrollü</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acil Triyaj Arcade - Mobil Uyumlu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -17,58 +17,69 @@
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
+            touch-action: none; /* Sayfa kaydırmayı engeller */
         }
 
         #game-container {
             position: relative;
-            border: 4px solid #333;
-            border-radius: 12px;
+            border: 3px solid #333;
+            border-radius: 8px;
             background-color: #000;
+            width: 95vw; /* Mobil için genişlik */
+            max-width: 600px;
         }
 
-        canvas { display: block; }
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: auto; 
+            touch-action: none;
+        }
 
         .ui-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            padding: 10px 25px;
-            font-size: 1.3rem;
+            padding: 8px 15px;
+            font-size: 1.1rem;
             font-weight: bold;
             background: #2c3e50;
-            border-bottom: 3px solid #34495e;
+            border-bottom: 2px solid #34495e;
         }
 
         .mute-btn {
             background: none;
             border: 1px solid #555;
             color: white;
-            padding: 2px 10px;
+            padding: 1px 8px;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
 
-        .mute-btn:hover { background: #34495e; }
-
         .controls {
-            margin-top: 15px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            width: 100%;
         }
 
         .difficulty-buttons .btn {
-            margin: 0 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
             opacity: 0.5;
-            font-weight: bold;
         }
 
         .difficulty-buttons .active {
             opacity: 1;
-            border: 2px solid white;
+            border: 1px solid white;
+        }
+
+        .main-buttons .btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
         }
 
         #game-over-overlay {
@@ -80,6 +91,7 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
+            text-align: center;
         }
     </style>
 </head>
@@ -87,17 +99,17 @@
 
     <div id="game-container">
         <div class="ui-top">
-            <div>SÜRE: <span id="timer" style="color: #3498db;">0</span></div>
-            <div>PUAN: <span id="score" style="color: #f1c40f;">0</span></div>
-            <button id="muteToggle" class="mute-btn" onclick="toggleMute()">🔊 SES AÇIK</button>
+            <div>S: <span id="timer" style="color: #3498db;">0</span></div>
+            <div>P: <span id="score" style="color: #f1c40f;">0</span></div>
+            <button id="muteToggle" class="mute-btn" onclick="toggleMute()">🔊</button>
         </div>
         
-        <canvas id="gameCanvas" width="600" height="500"></canvas>
+        <canvas id="gameCanvas"></canvas>
 
         <div id="game-over-overlay">
-            <h1 class="text-danger mb-2">OYUN BİTTİ</h1>
-            <p id="final-result" class="fs-4 mb-4"></p>
-            <button class="btn btn-lg btn-primary px-5" onclick="resetGame()">Yeniden Başla</button>
+            <h2 class="text-danger">OYUN BİTTİ</h2>
+            <p id="final-result" class="fs-5 mb-3"></p>
+            <button class="btn btn-primary" onclick="resetGame()">Yeniden Başla</button>
         </div>
     </div>
 
@@ -109,9 +121,9 @@
         </div>
 
         <div class="main-buttons">
-            <button id="startBtn" class="btn btn-success btn-lg px-4" onclick="startGame()">BAŞLA</button>
-            <button id="endBtn" class="btn btn-danger btn-lg px-4" onclick="endGame()">BİTİR</button>
-            <button class="btn btn-secondary btn-lg px-4" onclick="resetGame()">RESTART</button>
+            <button id="startBtn" class="btn btn-success" onclick="startGame()">BAŞLA</button>
+            <button id="endBtn" class="btn btn-danger" onclick="endGame()">BİTİR</button>
+            <button class="btn btn-secondary" onclick="resetGame()">RESTART</button>
         </div>
     </div>
 
@@ -122,60 +134,71 @@
         const timerEl = document.getElementById('timer');
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
-        const muteToggle = document.getElementById('muteToggle');
 
         let score = 0, time = 0, gameRunning = false, isMuted = false;
         let animationId, timerInterval, patients = [];
         let difficulty = 'easy';
 
-        // --- SES SİSTEMİ ---
+        // Ses Sistemi
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            muteToggle.innerText = isMuted ? "🔇 SES KAPALI" : "🔊 SES AÇIK";
-        }
-
+        function toggleMute() { isMuted = !isMuted; muteToggle.innerText = isMuted ? "🔇" : "🔊"; }
         function playSound(freq, type, duration, vol) {
             if (isMuted) return;
-            const oscillator = audioCtx.createOscillator();
+            const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            oscillator.type = type;
-            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            oscillator.connect(gain);
-            gain.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
-
         const SFX = {
-            start: () => { playSound(440, 'square', 0.2, 0.05); setTimeout(() => playSound(880, 'square', 0.4, 0.05), 100); },
+            start: () => { playSound(440, 'square', 0.2, 0.05); },
             catch: () => playSound(600, 'sine', 0.1, 0.1),
-            error: () => { playSound(150, 'sawtooth', 0.3, 0.1); playSound(100, 'sawtooth', 0.3, 0.1); },
-            end: () => { playSound(300, 'triangle', 0.5, 0.1); }
+            error: () => playSound(100, 'sawtooth', 0.3, 0.1),
+            end: () => playSound(200, 'triangle', 0.5, 0.1)
         };
 
-        // --- DENGELENMİŞ ZORLUKLAR ---
-        const difficultySettings = {
-            easy: { blackChance: 0.002 },
-            medium: { blackChance: 0.008 },
-            hard: { blackChance: 0.025 } // Düşürüldü, daha oynanabilir
-        };
-
-        const paddle = {
-            width: 90, height: 16,
-            x: 255, y: 460,
-            speed: 13, dx: 0
-        };
-
+        const difficultySettings = { easy: { blackChance: 0.002 }, medium: { blackChance: 0.008 }, hard: { blackChance: 0.022 } };
         const patientTypes = {
-            GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
-            YELLOW: { color: '#FFFF00', speed: 4.0, points: 10 },
-            RED: { color: '#FF0000', speed: 6.0, points: 20 },
-            BLACK: { color: '#444444', speed: 4.8, points: -15 }
+            GREEN: { color: '#00FF00', speed: 2.2, points: 5 },
+            YELLOW: { color: '#FFFF00', speed: 3.5, points: 10 },
+            RED: { color: '#FF0000', speed: 5.5, points: 20 },
+            BLACK: { color: '#333333', speed: 4.5, points: -15 }
         };
+
+        let paddle = { width: 80, height: 14, x: 0, y: 0, speed: 13, dx: 0 };
+
+        function resizeCanvas() {
+            const containerW = document.getElementById('game-container').clientWidth;
+            canvas.width = containerW;
+            canvas.height = window.innerHeight * 0.6; 
+            paddle.y = canvas.height - 40;
+            paddle.x = (canvas.width / 2) - (paddle.width / 2);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Klavye Kontrol
+        document.addEventListener('keydown', e => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
+            if (key === 'arrowright' || key === 'd') paddle.dx = paddle.speed;
+        });
+        document.addEventListener('keyup', () => paddle.dx = 0);
+
+        // Dokunmatik Kontrol (Touch)
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            paddle.x = touchX - (paddle.width / 2);
+            // Sınırlandırma
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+        }, { passive: false });
 
         function setDifficulty(lvl) {
             if (gameRunning) return;
@@ -184,49 +207,25 @@
             document.getElementById('btn-' + lvl).classList.add('active');
         }
 
-        document.addEventListener('keydown', e => {
-            const key = e.key.toLowerCase();
-            if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
-            if (key === 'arrowright' || key === 'd') paddle.dx = paddle.speed;
-        });
-        document.addEventListener('keyup', () => paddle.dx = 0);
-
         function drawStretcher(x, y, w, h) {
-            ctx.fillStyle = "#555";
-            ctx.beginPath();
-            ctx.arc(x + 15, y + h + 4, 5, 0, Math.PI * 2);
-            ctx.arc(x + w - 15, y + h + 4, 5, 0, Math.PI * 2);
-            ctx.fill();
-
             ctx.fillStyle = "#FFFFFF";
             ctx.beginPath();
-            ctx.roundRect(x + 20, y, w - 20, h, 4);
-            ctx.moveTo(x, y - 10);
-            ctx.lineTo(x + 25, y);
-            ctx.lineTo(x + 25, y + h);
-            ctx.lineTo(x + 5, y + h);
-            ctx.closePath();
+            ctx.roundRect(x + 15, y, w - 15, h, 4);
+            ctx.moveTo(x, y - 8); ctx.lineTo(x + 20, y); ctx.lineTo(x + 20, y + h); ctx.lineTo(x + 5, y + h);
+            ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#555";
+            ctx.beginPath();
+            ctx.arc(x + 15, y + h + 3, 4, 0, Math.PI * 2); ctx.arc(x + w - 10, y + h + 3, 4, 0, Math.PI * 2);
             ctx.fill();
-            
-            ctx.strokeStyle = "#95a5a6";
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 20, y + h - 4, w - 20, 2);
         }
 
         function drawPerson(x, y, color, isEx) {
             ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(x + 15, y + 8, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.roundRect(x + 7, y + 16, 16, 20, 4);
-            ctx.fill();
-
+            ctx.beginPath(); ctx.arc(x + 12, y + 6, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(x + 6, y + 13, 12, 16, 3); ctx.fill();
             if(isEx) {
-                ctx.fillStyle = "white";
-                ctx.font = "bold 16px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText("X", x + 15, y + 30);
+                ctx.fillStyle = "white"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
+                ctx.fillText("X", x + 12, y + 25);
             }
         }
 
@@ -235,45 +234,41 @@
             const keys = ['GREEN', 'YELLOW', 'RED'];
             const typeKey = keys[Math.floor(Math.random() * keys.length)];
             patients.push({
-                x: Math.random() * (canvas.width - 40) + 10,
-                y: -50, width: 30, height: 40,
+                x: Math.random() * (canvas.width - 30) + 5,
+                y: -40, width: 25, height: 35,
                 type: { ...patientTypes[typeKey] },
                 isBlack: false,
                 activeZone: canvas.height * 0.45
             });
-            setTimeout(createPatient, Math.max(300, 1100 - (time * 2)));
+            setTimeout(createPatient, Math.max(400, 1200 - (time * 2)));
         }
 
         function draw() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
 
             patients.forEach((p, i) => {
                 if (!p.isBlack && p.y > p.activeZone) {
                     if (Math.random() < difficultySettings[difficulty].blackChance) {
-                        p.isBlack = true;
-                        p.type = { ...patientTypes.BLACK };
+                        p.isBlack = true; p.type = { ...patientTypes.BLACK };
                     }
                 }
-
                 drawPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
-
                 if (p.y + p.height > paddle.y && p.x + p.width > paddle.x && p.x < paddle.x + paddle.width && p.y < paddle.y + paddle.height) {
                     if (p.isBlack) SFX.error(); else SFX.catch();
-                    score += p.type.points;
-                    scoreEl.innerText = score;
+                    score += p.type.points; scoreEl.innerText = score;
                     patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
 
-            paddle.x += paddle.dx;
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
-
+            if (paddle.dx !== 0) {
+                paddle.x += paddle.dx;
+                if (paddle.x < 0) paddle.x = 0;
+                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            }
             animationId = requestAnimationFrame(draw);
         }
 
@@ -296,7 +291,7 @@
             gameRunning = false;
             clearInterval(timerInterval);
             cancelAnimationFrame(animationId);
-            finalResultEl.innerHTML = `Puan: ${score} | Süre: ${time} sn`;
+            finalResultEl.innerHTML = `Puan: ${score}<br>Süre: ${time} sn`;
             overlay.style.display = 'flex';
         }
 
