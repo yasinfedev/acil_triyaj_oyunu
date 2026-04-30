@@ -10,14 +10,15 @@
         :root { --sf-yellow: #ffcc00; --sf-orange: #ff4500; --bg-dark: #1a1a1a; }
         
         body {
-            background-color: var(--bg-dark);
-            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('https://img.freepik.com/free-vector/hospital-hallway-concept-illustration_114360-14169.jpg');
-            background-size: cover; background-position: center;
-            color: white; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            min-height: 100vh; margin: 0; padding-top: 20px;
-            font-family: 'Press Start 2P', cursive; overflow-x: hidden; touch-action: none;
-        }
-
+    background-color: #1a1a1a;
+    /* Kendi görselini yüklediğinde URL kısmını güncelleyebilirsin */
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), /* Oyun alanını okunaklı tutmak için karartma katmanı */
+        url('https://acil42.com/wp-content/uploads/2026/05/Gemini_Generated_Image_6l5nw56l5nw56l5n.png'); 
+    background-size: cover; 
+    background-position: center;
+    background-attachment: fixed; /* Kaydırmada görsel sabit kalır, derinlik hissi artar */
+}
         .game-title {
             font-size: 18px; font-style: italic; color: var(--sf-yellow);
             text-shadow: 3px 3px 0px var(--sf-orange), 5px 5px 0px #000;
