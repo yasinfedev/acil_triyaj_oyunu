@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Klasik</title>
+    <title>Acil Triyaj Arcade - Klasik Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -11,148 +11,134 @@
         
         body {
             background-color: #000;
-            color: #fff;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
+            padding-top: 20px;
             font-family: 'Press Start 2P', cursive;
             overflow-x: hidden;
             touch-action: none;
         }
 
         .game-title {
-            font-size: 18px;
-            color: var(--sf-yellow);
+            font-size: 18px; font-style: italic; color: var(--sf-yellow);
             text-shadow: 2px 2px 0px var(--sf-orange);
-            margin: 20px 0;
-            text-align: center;
+            margin-bottom: 20px; text-align: center;
+        }
+
+        /* Akordiyon Stilleri */
+        .accordion-item {
+            width: 95vw; max-width: 500px;
+            border: 2px solid var(--dark-gray);
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background: #222; color: var(--sf-yellow);
+            padding: 10px; font-size: 9px; cursor: pointer;
+            text-align: center; width: 100%; border: none;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .accordion-content {
+            background: #111; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s;
+            font-size: 8px; line-height: 1.6;
+        }
+
+        .accordion-content.open {
+            max-height: 200px; padding: 15px;
         }
 
         #game-container {
-            position: relative;
-            border: 4px solid var(--dark-gray);
-            background-color: #000;
-            width: 95vw;
-            max-width: 500px;
+            position: relative; border: 4px solid var(--dark-gray);
+            background-color: rgba(0, 0, 0, 0.9); width: 95vw; max-width: 500px;
         }
 
         canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 
-        /* UI Paneli */
         .ui-top {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            font-size: 10px;
-            border-bottom: 2px solid var(--dark-gray);
+            display: flex; justify-content: space-between; padding: 10px; font-size: 9px;
+            background: #222; border-bottom: 2px solid var(--dark-gray);
         }
 
-        /* Akordiyon Menü Tasarımı */
-        .accordion-btn {
-            width: 95vw;
-            max-width: 500px;
-            background: #222;
-            color: var(--sf-yellow);
-            border: 2px solid var(--dark-gray);
-            padding: 10px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-            cursor: pointer;
-            margin: 5px 0;
-            text-align: center;
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background: #111;
-            width: 95vw;
-            max-width: 500px;
-            font-size: 7px;
-            border-left: 2px solid var(--dark-gray);
-            border-right: 2px solid var(--dark-gray);
-        }
-
-        .accordion-content.open {
-            max-height: 200px;
-            padding: 10px;
-            border-bottom: 2px solid var(--dark-gray);
-        }
-
-        /* Butonlar */
         .pixel-btn {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-            border: 2px solid #fff;
-            padding: 8px 10px;
-            background: transparent;
-            color: #fff;
-            cursor: pointer;
-            margin: 2px;
+            font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #fff;
+            padding: 8px 10px; text-transform: uppercase; transition: 0.1s;
+            cursor: pointer; background: transparent; color: white;
         }
 
-        .active-diff { background: #444 !important; border-color: var(--sf-yellow) !important; }
+        .pixel-btn:active { transform: translate(1px, 1px); }
+        .active-diff { border-color: var(--sf-yellow) !important; background: #333; }
+
+        .bottom-controls { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; width: 95vw; max-width: 500px; justify-content: center; }
 
         #game-over-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 20;
+            justify-content: center; align-items: center; z-index: 20; padding: 20px;
         }
 
-        .footer-credit { margin: 20px 0; font-size: 7px; color: #555; text-align: center; }
+        .footer-credit { margin-top: 20px; font-size: 7px; color: #777; text-align: center; padding-bottom: 20px; }
+
+        .hs-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: #00e5ff; }
     </style>
 </head>
 <body>
 
     <h1 class="game-title">ACİL TRİYAJ ARCADE</h1>
 
-    <!-- Nasıl Oynanır Akordiyon -->
-    <button class="accordion-btn" onclick="toggleAccordion('howToPlay')">NASIL OYNANIR? ▼</button>
-    <div id="howToPlay" class="accordion-content">
-        • Sağa/Sola hareketle hastaları sedyeye al!<br><br>
-        • YEŞİL(+5), SARI(+10), KIRMIZI(+20)<br><br>
-        • SİYAH (EX) yakalarsan -15 PUAN!
+    <!-- NASIL OYNANIR AKORDİYON -->
+    <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAcc('howToPlay')">NASIL OYNANIR? ▼</button>
+        <div id="howToPlay" class="accordion-content">
+            • Sağa/Sola hareketle hastaları yakala!<br>
+            • YEŞİL(+5), SARI(+10), KIRMIZI(+20)<br>
+            • SİYAH (EX) yakalarsan -15 PUAN!
+        </div>
     </div>
 
-    <div class="d-flex gap-2 my-2">
-        <button id="sfxToggle" class="pixel-btn" onclick="btnSound(); toggleSFX()">SES: AÇIK</button>
-        <button id="musicToggle" class="pixel-btn" onclick="btnSound(); toggleMusic()">MÜZİK: AÇIK</button>
+    <div class="d-flex gap-2 mb-2">
+        <button id="sfxToggle" class="pixel-btn" onclick="btnClickSound(); toggleSFX()">EFEKT: AÇIK</button>
+        <button id="musicToggle" class="pixel-btn" onclick="btnClickSound(); toggleMusic()">MÜZİK: AÇIK</button>
     </div>
 
-    <div class="mb-2 d-flex gap-2">
-        <button id="btn-easy" class="pixel-btn active-diff" onclick="btnSound(); setDifficulty('easy')">KOLAY</button>
-        <button id="btn-medium" class="pixel-btn" onclick="btnSound(); setDifficulty('medium')">ORTA</button>
-        <button id="btn-hard" class="pixel-btn" onclick="btnSound(); setDifficulty('hard')">ZOR</button>
+    <div class="mb-3 d-flex gap-2">
+        <button id="btn-easy" class="pixel-btn active-diff" onclick="btnClickSound(); setDifficulty('easy')">KOLAY</button>
+        <button id="btn-medium" class="pixel-btn" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('medium')">ORTA</button>
+        <button id="btn-hard" class="pixel-btn" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('hard')">ZOR</button>
     </div>
 
     <div id="game-container">
         <div class="ui-top">
-            <div style="color: #00e5ff;">SÜRE: <span id="timer">0</span></div>
-            <div style="color: var(--sf-yellow);">PUAN: <span id="score">0</span></div>
+            <div style="color: #00e5ff;">SÜRE:<span id="timer">0</span></div>
+            <div style="color: var(--sf-yellow);">PUAN:<span id="score">0</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
         <div id="game-over-overlay">
-            <div class="game-title">OYUN BİTTİ</div>
+            <div class="game-title" style="font-size: 16px;">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2; text-align: center;"></div>
-            <button class="pixel-btn w-75 mb-2" onclick="btnSound(); resetGame()">TEKRAR DENE</button>
-            <button class="pixel-btn w-75" onclick="btnSound(); generateAndShare()">PAYLAŞ 📱</button>
+            <button class="pixel-btn w-75 mb-2" onclick="btnClickSound(); resetGame()">TEKRAR DENE</button>
+            <button class="pixel-btn w-75" style="border-color: var(--sf-yellow)" onclick="btnClickSound(); generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
 
-    <div class="bottom-controls my-2 d-flex gap-2">
-        <button id="startBtn" class="pixel-btn" style="border-color: #00FF00;" onclick="startGame()">BAŞLA</button>
-        <button id="endBtn" class="pixel-btn" style="border-color: #FF0000;" onclick="btnSound(); endGame()">BİTİR</button>
-        <button id="restartBtn" class="pixel-btn" style="border-color: #00e5ff;" onclick="btnSound(); resetGame()">RESTART</button>
+    <div class="bottom-controls">
+        <button id="startBtn" class="pixel-btn" style="border-color: #00FF00" onclick="startGame()">BAŞLA</button>
+        <button id="endBtn" class="pixel-btn" style="border-color: #FF0000" onclick="btnClickSound(); endGame()">BİTİR</button>
+        <button id="restartBtn" class="pixel-btn" style="border-color: #00e5ff" onclick="btnClickSound(); resetGame()">RESTART</button>
     </div>
 
-    <!-- Skorlar Akordiyon -->
-    <button class="accordion-btn" onclick="toggleAccordion('highScores')">TOP 3 SKORLAR ▼</button>
-    <div id="highScores" class="accordion-content">
-        <div id="hsList" style="padding: 5px;">Henüz skor yok.</div>
+    <!-- TOP 3 SKORLAR AKORDİYON -->
+    <div class="accordion-item" style="margin-top: 15px;">
+        <button class="accordion-header" onclick="toggleAcc('highScores')">TOP 3 SKORLAR ▼</button>
+        <div id="highScores" class="accordion-content">
+            <div id="hsList">Henüz skor kaydedilmedi.</div>
+        </div>
     </div>
 
     <div class="footer-credit">
@@ -173,93 +159,114 @@
         let paddle = { width: 80, height: 16, x: 0, y: 0, speed: 16, dx: 0 };
 
         const difficultySettings = { easy: { blackChance: 0.002, tr: 'KOLAY' }, medium: { blackChance: 0.01, tr: 'ORTA' }, hard: { blackChance: 0.025, tr: 'ZOR' } };
-        const patientTypes = { GREEN: '#00FF00', YELLOW: '#FFFF00', RED: '#FF0000', BLACK: '#333' };
+        const patientTypes = {
+            GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
+            YELLOW: { color: '#FFFF00', speed: 3.8, points: 10 },
+            RED: { color: '#FF0000', speed: 5.8, points: 20 },
+            BLACK: { color: '#333333', speed: 4.8, points: -15 }
+        };
 
-        // Akordiyon Kontrolü
-        function toggleAccordion(id) {
+        // --- AKORDİYON MANTIĞI ---
+        function toggleAcc(id) {
             const content = document.getElementById(id);
             content.classList.toggle('open');
         }
 
-        // Skor Sistemi
-        function updateScores() {
-            let scores = JSON.parse(localStorage.getItem('triyajScores') || '[]');
+        // --- SKOR TABLOSU MANTIĞI ---
+        function saveScore() {
+            let scores = JSON.parse(localStorage.getItem('triyaj_highscores') || '[]');
             if (score > 0) {
-                scores.push({ s: score, d: difficultySettings[difficulty].tr });
-                scores.sort((a, b) => b.s - a.s);
+                scores.push({ score, diff: difficultySettings[difficulty].tr, date: new Date().toLocaleDateString('tr-TR') });
+                scores.sort((a, b) => b.score - a.score);
                 scores = scores.slice(0, 3);
-                localStorage.setItem('triyajScores', JSON.stringify(scores));
+                localStorage.setItem('triyaj_highscores', JSON.stringify(scores));
             }
-            const hsList = document.getElementById('hsList');
-            hsList.innerHTML = scores.map((s, i) => `${i+1}. ${s.d}: ${s.s} P`).join('<br>');
+            renderScores();
         }
 
-        // Sesler
+        function renderScores() {
+            const scores = JSON.parse(localStorage.getItem('triyaj_highscores') || '[]');
+            const list = document.getElementById('hsList');
+            if(scores.length === 0) return;
+            list.innerHTML = scores.map((s, i) => `
+                <div class="hs-row">
+                    <span>${i+1}. ${s.diff}</span>
+                    <span>${s.score} P</span>
+                </div>
+            `).join('');
+        }
+
+        // --- SES SİSTEMİ ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSnd(f, t, d, v) {
-            if ((!sfxEnabled && t !== 'triangle') || (!musicEnabled && t === 'triangle')) return;
-            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(v, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + d);
+        function playNote(freq, type, duration, vol) {
+            if (!sfxEnabled && (type === 'square' || type === 'sawtooth')) return;
+            if (!musicEnabled && type === 'triangle') return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
-        function btnSound() { playSnd(400, 'square', 0.05, 0.05); }
-
-        // Müzik (Önceki Ritmik Yapı)
+        function btnClickSound() { playNote(400, 'square', 0.05, 0.05); }
         function startMusic() {
             if (musicInterval) clearInterval(musicInterval);
-            const melody = [261, 329, 392, 523]; let s = 0;
-            musicInterval = setInterval(() => { if (gameRunning && musicEnabled) { playSnd(melody[s % 4], 'triangle', 0.4, 0.03); s++; } }, 250);
+            const melody = [261, 329, 392, 523, 392, 329]; let step = 0;
+            musicInterval = setInterval(() => {
+                if (gameRunning && musicEnabled) {
+                    playNote(melody[step % melody.length], 'triangle', 0.4, 0.03);
+                    step++;
+                }
+            }, 250);
         }
 
-        // Çizimler
-        function drawStretcher(x, y, w, h) {
+        // --- ÇİZİMLER ---
+        function drawPixelStretcher(x, y, w, h) {
             ctx.fillStyle = "#FFF"; ctx.fillRect(x + 20, y + 4, w - 20, 8); ctx.fillRect(x + 4, y, 16, 4);
             ctx.fillStyle = "#AAA"; ctx.fillRect(x + 20, y + 12, w - 20, 2);
             ctx.fillStyle = "#555"; ctx.fillRect(x + 24, y + 14, 6, 6); ctx.fillRect(x + w - 12, y + 14, 6, 6);
         }
-        function drawPerson(x, y, color, isEx) {
+        function drawPixelPerson(x, y, color, isEx) {
             ctx.fillStyle = color; ctx.fillRect(x + 8, y, 12, 12); ctx.fillRect(x, y + 12, 28, 24);
             if(isEx) { ctx.fillStyle = "#FFF"; ctx.font = "bold 14px Arial"; ctx.fillText("X", x + 8, y + 30); }
         }
 
-        function resize() {
-            const w = document.getElementById('game-container').clientWidth;
-            canvas.width = w; canvas.height = window.innerHeight * 0.5;
-            paddle.y = canvas.height - 70; paddle.x = (w / 2) - 40;
+        function resizeCanvas() {
+            const containerW = document.getElementById('game-container').clientWidth;
+            canvas.width = containerW; canvas.height = window.innerHeight * 0.45;
+            paddle.y = canvas.height - 70; paddle.x = (canvas.width / 2) - 40;
         }
-        window.addEventListener('resize', resize); resize();
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
-        // Hareket
         document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') paddle.dx = -paddle.speed;
-            if (e.key === 'ArrowRight' || e.key === 'd') paddle.dx = paddle.speed;
+            const key = e.key.toLowerCase();
+            if (key === 'arrowleft' || key === 'a') paddle.dx = -paddle.speed;
+            if (key === 'arrowright' || key === 'd') paddle.dx = paddle.speed;
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
+
         canvas.addEventListener('touchmove', e => {
-            e.preventDefault(); const t = e.touches[0]; const r = canvas.getBoundingClientRect();
-            paddle.x = (t.clientX - r.left) * (canvas.width / r.width) - 40;
+            e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect();
+            paddle.x = (touch.clientX - rect.left) * (canvas.width / rect.width) - 40;
             paddle.x = Math.max(0, Math.min(canvas.width - 80, paddle.x));
         }, { passive: false });
 
         function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
+            drawPixelStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
             paddle.x += paddle.dx; paddle.x = Math.max(0, Math.min(canvas.width - 80, paddle.x));
 
             patients.forEach((p, i) => {
                 if (!p.isBlack && p.y > canvas.height * 0.4 && Math.random() < difficultySettings[difficulty].blackChance) {
-                    p.isBlack = true; p.c = patientTypes.BLACK;
+                    p.isBlack = true; p.type = { ...patientTypes.BLACK };
                 }
-                drawPerson(p.x, p.y, p.c, p.isBlack);
-                p.y += p.s;
+                drawPixelPerson(p.x, p.y, p.type.color, p.isBlack);
+                p.y += p.type.speed;
                 if (p.y + 30 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + 80) {
-                    playSnd(p.isBlack ? 100 : 800, 'square', 0.1, 0.1);
-                    score += p.isBlack ? -15 : (p.c === patientTypes.GREEN ? 5 : (p.c === patientTypes.YELLOW ? 10 : 20));
-                    scoreEl.innerText = score; patients.splice(i, 1);
+                    playNote(p.isBlack ? 150 : 600, 'square', 0.1, 0.1);
+                    score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
@@ -268,11 +275,8 @@
 
         function spawn() {
             if (!gameRunning) return;
-            const types = [
-                {c: patientTypes.GREEN, s: 2.3}, {c: patientTypes.YELLOW, s: 3.8}, {c: patientTypes.RED, s: 5.8}
-            ];
-            const t = types[Math.floor(Math.random() * 3)];
-            patients.push({ x: Math.random() * (canvas.width - 30), y: -50, c: t.c, s: t.s, isBlack: false });
+            const keys = ['GREEN', 'YELLOW', 'RED'];
+            patients.push({ x: Math.random() * (canvas.width - 30), y: -50, type: { ...patientTypes[keys[Math.floor(Math.random() * 3)]] }, isBlack: false });
             setTimeout(spawn, 1000);
         }
 
@@ -285,32 +289,35 @@
 
         function endGame() {
             if (!gameRunning) return; gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
-            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn`;
-            overlay.style.display = 'flex'; updateScores();
+            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>MOD: ${difficultySettings[difficulty].tr}`;
+            overlay.style.display = 'flex';
+            saveScore();
         }
 
         function resetGame() { endGame(); setTimeout(startGame, 100); }
         function setDifficulty(l) {
             if (gameRunning) return; difficulty = l;
-            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
-            document.getElementById('btn-' + l).classList.add('active-diff');
+            document.querySelectorAll('.mb-3 .pixel-btn').forEach(b => { b.classList.remove('active-diff'); b.style.opacity = "0.6"; });
+            const active = document.getElementById('btn-' + l);
+            active.classList.add('active-diff'); active.style.opacity = "1";
         }
-        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `SES: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
+
+        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `EFEKT: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
         function toggleMusic() { musicEnabled = !musicEnabled; document.getElementById('musicToggle').innerText = `MÜZİK: ${musicEnabled ? 'AÇIK' : 'KAPALI'}`; }
-        
+
         function generateAndShare() {
-            const tC = document.createElement('canvas'); const t = tC.getContext('2d'); tC.width = 500; tC.height = 400;
-            t.fillStyle = '#000'; t.fillRect(0, 0, 500, 400);
-            t.fillStyle = var(--sf-yellow); t.font = 'bold 30px Arial'; t.textAlign = 'center'; t.fillText('TRİYAJ SKORUM', 250, 100);
-            t.fillStyle = '#FFF'; t.font = 'bold 80px Arial'; t.fillText(score, 250, 220);
-            t.font = '20px Arial'; t.fillText(time + ' SANİYE', 250, 300);
+            const tC = document.createElement('canvas'); const t = tC.getContext('2d'); tC.width = 500; tC.height = 550;
+            t.fillStyle = '#000'; t.fillRect(0, 0, 500, 550);
+            t.fillStyle = var(--sf-yellow); t.font = 'bold 30px Arial'; t.textAlign = 'center'; t.fillText('TRİYAJ ARCADE', 250, 80);
+            t.fillStyle = '#FFF'; t.font = 'bold 100px Arial'; t.fillText(score, 250, 250);
+            t.font = '20px Arial'; t.fillText(time + ' SANİYE', 250, 320);
             tC.toBlob(blob => {
-                const f = new File([blob], 'rekor.png', {type: 'image/png'});
+                const f = new File([blob], 'triyaj.png', {type: 'image/png'});
                 if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
             });
         }
         
-        updateScores(); // İlk açılışta skorları yükle
+        renderScores(); // Açılışta skorları getir
     </script>
 </body>
 </html>
