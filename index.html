@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Retro Pixel</title>
+    <title>Acil Triyaj Arcade - Dr. Yasin Yıldız Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -33,6 +33,7 @@
         .pixel-btn {
             font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #000;
             box-shadow: 2px 2px 0px #555; padding: 8px 10px; text-transform: uppercase; transition: 0.1s;
+            cursor: pointer;
         }
         .pixel-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
         .btn-sf { background: linear-gradient(to bottom, var(--sf-yellow), var(--sf-orange)); color: white; text-shadow: 1px 1px #000; }
@@ -43,6 +44,9 @@
             justify-content: center; align-items: center; z-index: 20; padding: 20px;
         }
         .active-diff { border: 2px solid white !important; opacity: 1 !important; transform: scale(1.1); }
+        .footer-credit {
+            margin-top: 20px; font-size: 7px; color: #777; text-align: center; line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -50,14 +54,14 @@
     <h1 class="game-title">ACİL TRİYAJ<br>ARCADE</h1>
 
     <div class="d-flex gap-2 mb-2">
-        <button id="sfxToggle" class="pixel-btn btn-secondary" onclick="toggleSFX()">EFEKT: AÇIK</button>
-        <button id="musicToggle" class="pixel-btn btn-secondary" onclick="toggleMusic()">MÜZİK: AÇIK</button>
+        <button id="sfxToggle" class="pixel-btn btn-secondary" onclick="btnClickSound(); toggleSFX()">EFEKT: AÇIK</button>
+        <button id="musicToggle" class="pixel-btn btn-secondary" onclick="btnClickSound(); toggleMusic()">MÜZİK: AÇIK</button>
     </div>
 
     <div class="mb-3 d-flex gap-2">
-        <button id="btn-easy" class="pixel-btn btn-success active-diff" onclick="setDifficulty('easy')">KOLAY</button>
-        <button id="btn-medium" class="pixel-btn btn-warning" style="opacity:0.6" onclick="setDifficulty('medium')">ORTA</button>
-        <button id="btn-hard" class="pixel-btn btn-danger" style="opacity:0.6" onclick="setDifficulty('hard')">ZOR</button>
+        <button id="btn-easy" class="pixel-btn btn-success active-diff" onclick="btnClickSound(); setDifficulty('easy')">KOLAY</button>
+        <button id="btn-medium" class="pixel-btn btn-warning" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('medium')">ORTA</button>
+        <button id="btn-hard" class="pixel-btn btn-danger" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('hard')">ZOR</button>
     </div>
 
     <div id="game-container">
@@ -69,15 +73,19 @@
         <div id="game-over-overlay">
             <div class="game-title" style="font-size: 16px;">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2;"></div>
-            <button class="pixel-btn btn-primary w-75 mb-2" onclick="resetGame()">TEKRAR DENE</button>
-            <button class="pixel-btn btn-sf w-75" onclick="generateAndShare()">PAYLAŞ 📱</button>
+            <button class="pixel-btn btn-primary w-75 mb-2" onclick="btnClickSound(); resetGame()">TEKRAR DENE</button>
+            <button class="pixel-btn btn-sf w-75" onclick="btnClickSound(); generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
 
     <div class="bottom-controls">
         <button id="startBtn" class="pixel-btn btn-success" onclick="startGame()">BAŞLA</button>
-        <button id="endBtn" class="pixel-btn btn-danger" onclick="endGame()">BİTİR</button>
-        <button id="restartBtn" class="pixel-btn btn-secondary" onclick="resetGame()">RESTART</button>
+        <button id="endBtn" class="pixel-btn btn-danger" onclick="btnClickSound(); endGame()">BİTİR</button>
+        <button id="restartBtn" class="pixel-btn btn-secondary" onclick="btnClickSound(); resetGame()">RESTART</button>
+    </div>
+
+    <div class="footer-credit">
+        Geliştirici Uzm.Dr.Yasin Yıldız (c) 2026<br>Tüm hakları saklıdır.
     </div>
 
     <script>
@@ -101,9 +109,13 @@
             BLACK: { color: '#333333', speed: 4.8, points: -15 }
         };
 
-        // --- SES SİSTEMİ (MARIO TARZI) ---
+        // --- SES SENTEZLEYİCİ ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
         function playNote(freq, type, duration, vol) {
+            if (!sfxEnabled && (type === 'square' || type === 'sawtooth')) return;
+            if (!musicEnabled && type === 'triangle') return;
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
@@ -113,19 +125,27 @@
             osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
-        function playMarioTheme() {
-            if (!gameRunning || !musicEnabled) return;
-            const tempo = 150;
-            const melody = [
-                {f: 659, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 523, d: 100}, {f: 659, d: 100}, {f: 0, d: 100}, {f: 783, d: 100}
-            ];
-            let i = 0;
-            const playNext = () => {
-                if (!gameRunning || !musicEnabled) return;
-                if (melody[i].f > 0) playNote(melody[i].f, 'square', melody[i].d/1000, 0.03);
-                setTimeout(() => { i = (i + 1) % melody.length; playNext(); }, melody[i].d + 50);
-            };
-            playNext();
+        // Buton tıklama sesi
+        function btnClickSound() { playNote(400, 'square', 0.05, 0.05); }
+
+        const SFX = {
+            catch: () => playNote(600, 'square', 0.1, 0.1),
+            hitBlack: () => { playNote(150, 'sawtooth', 0.3, 0.2); playNote(100, 'sawtooth', 0.3, 0.2); },
+            start: () => { playNote(440, 'square', 0.2, 0.1); setTimeout(() => playNote(554, 'square', 0.2, 0.1), 100); },
+            end: () => playNote(200, 'square', 0.5, 0.1)
+        };
+
+        // Yumuşak Fon Müziği (Döngü)
+        function startMusic() {
+            if (musicInterval) clearInterval(musicInterval);
+            const melody = [261, 329, 392, 523, 392, 329];
+            let step = 0;
+            musicInterval = setInterval(() => {
+                if (gameRunning && musicEnabled) {
+                    playNote(melody[step % melody.length], 'triangle', 0.4, 0.03);
+                    step++;
+                }
+            }, 250);
         }
 
         function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `EFEKT: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
@@ -134,12 +154,10 @@
         // --- PİXEL ÇİZİMLER ---
         function drawPixelStretcher(x, y, w, h) {
             ctx.fillStyle = "#FFF";
-            // Gövde (Bloklu)
             ctx.fillRect(x + 20, y + 4, w - 20, 8);
-            ctx.fillRect(x + 4, y, 16, 4); // Baş yastığı
+            ctx.fillRect(x + 4, y, 16, 4);
             ctx.fillStyle = "#AAA";
-            ctx.fillRect(x + 20, y + 12, w - 20, 2); // İskelet
-            // Tekerlekler (Pixel)
+            ctx.fillRect(x + 20, y + 12, w - 20, 2);
             ctx.fillStyle = "#555";
             ctx.fillRect(x + 24, y + 14, 6, 6);
             ctx.fillRect(x + w - 12, y + 14, 6, 6);
@@ -147,9 +165,7 @@
 
         function drawPixelPerson(x, y, color, isEx) {
             ctx.fillStyle = color;
-            // Kafa (4x4 blok)
             ctx.fillRect(x + 8, y, 12, 12);
-            // Vücut (6x8 blok)
             ctx.fillRect(x, y + 12, 28, 24);
             if(isEx) {
                 ctx.fillStyle = "#FFF"; ctx.font = "bold 16px Arial";
@@ -172,6 +188,15 @@
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
 
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            paddle.x = (touch.clientX - rect.left) * (canvas.width / rect.width) - (paddle.width / 2);
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+        }, { passive: false });
+
         function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -186,12 +211,12 @@
                 drawPixelPerson(p.x, p.y, p.type.color, p.isBlack);
                 p.y += p.type.speed;
                 if (p.y + 30 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + paddle.width) {
-                    if (sfxEnabled) playNote(p.isBlack ? 100 : 800, 'square', 0.1, 0.1);
+                    if (p.isBlack) SFX.hitBlack(); else SFX.catch();
                     score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
-            requestAnimationFrame(update);
+            animationId = requestAnimationFrame(update);
         }
 
         function spawn() {
@@ -204,26 +229,41 @@
         function startGame() {
             if (gameRunning) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            SFX.start();
+            startMusic();
             gameRunning = true; score = 0; time = 0; patients = [];
             overlay.style.display = 'none';
             timerInterval = setInterval(() => { time++; timerEl.innerText = time; }, 1000);
-            if (musicEnabled) playMarioTheme();
             spawn(); update();
         }
 
         function endGame() {
-            gameRunning = false; clearInterval(timerInterval);
+            if (!gameRunning) return;
+            SFX.end();
+            gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
             finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>ZORLUK: ${difficultySettings[difficulty].tr}`;
             overlay.style.display = 'flex';
         }
 
-        function resetGame() { endGame(); setTimeout(startGame, 100); }
+        function resetGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            cancelAnimationFrame(animationId);
+            startGame();
+        }
 
         function setDifficulty(lvl) {
             if (gameRunning) return;
             difficulty = lvl;
-            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
-            document.getElementById('btn-' + lvl).classList.add('active-diff');
+            document.querySelectorAll('.pixel-btn').forEach(b => {
+                if(b.id.startsWith('btn-')) {
+                    b.classList.remove('active-diff');
+                    b.style.opacity = "0.6";
+                }
+            });
+            const activeBtn = document.getElementById('btn-' + lvl);
+            activeBtn.classList.add('active-diff');
+            activeBtn.style.opacity = "1";
         }
 
         function generateAndShare() {
@@ -236,6 +276,7 @@
             t.fillStyle = '#ffcc00'; t.font = 'bold 100px Arial'; t.textAlign = 'center'; t.fillText(score, 250, 300);
             t.fillStyle = '#ffffff'; t.font = '22px Courier New'; t.fillText('ARCADE SKORU', 250, 340);
             t.fillStyle = '#3498db'; t.fillText(`${time} SANİYE - ${difficultySettings[difficulty].tr}`, 250, 420);
+            t.fillStyle = '#777'; t.font = '12px Arial'; t.fillText('Geliştirici Uzm.Dr.Yasin Yıldız (c) 2026', 250, 520);
             tC.toBlob(blob => {
                 const f = new File([blob], 'triyaj.png', {type: 'image/png'});
                 if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
