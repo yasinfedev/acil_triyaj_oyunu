@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Ascom Edition</title>
+    <title>Acil Triyaj Arcade - Ascom Fix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -51,7 +51,6 @@
             justify-content: center; align-items: center; z-index: 20; padding: 20px;
         }
         .footer-credit { margin-top: 20px; font-size: 7px; color: #aaa; text-align: center; }
-        .hs-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: #00e5ff; }
     </style>
 </head>
 <body>
@@ -84,7 +83,7 @@
             <div class="game-title" id="over-title">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2; text-align: center;"></div>
             <button class="pixel-btn w-75 mb-2" onclick="resetGame()">TEKRAR DENE</button>
-            <button class="pixel-btn btn-sf w-75" style="color:white; background: linear-gradient(to bottom, #ffcc00, #ff4500);" onclick="generateAndShare()">PAYLAŞ 📱</button>
+            <button class="pixel-btn w-75" style="color:white; background: linear-gradient(to bottom, #ffcc00, #ff4500);" onclick="generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
 
@@ -92,11 +91,6 @@
         <button id="startBtn" class="pixel-btn" style="background:#28a745; color:white;" onclick="startGame()">BAŞLA</button>
         <button id="endBtn" class="pixel-btn" style="background:#dc3545; color:white;" onclick="endGame()">BİTİR</button>
         <button class="pixel-btn" onclick="resetGame()">RESTART</button>
-    </div>
-
-    <div class="accordion-wrapper" style="margin-top:15px;">
-        <button class="accordion-header" onclick="toggleAcc('highScores')">TOP 3 SKORLAR ▼</button>
-        <div id="highScores" class="accordion-content"><div id="hsList">Henüz skor yok.</div></div>
     </div>
 
     <div class="footer-credit">Geliştirici Uzm.Dr.Yasin Yıldız (c) 2026</div>
@@ -132,6 +126,7 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSnd(f, t, d, v) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
             o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
             g.gain.setValueAtTime(v, audioCtx.currentTime);
@@ -145,15 +140,32 @@
         function resizeCanvas() {
             canvas.width = document.getElementById('game-container').clientWidth;
             canvas.height = window.innerHeight * 0.45;
-            paddle.y = canvas.height - 70; paddle.x = (canvas.width / 2) - 42;
+            paddle.y = canvas.height - 70; 
+            paddle.x = (canvas.width / 2) - (paddle.width / 2);
         }
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
+        // Klavye Kontrolü
         document.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') paddle.dx = -paddle.speed;
             if (e.key === 'ArrowRight' || e.key === 'd') paddle.dx = paddle.speed;
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
+
+        // --- MOBİL DOKUNMATİK KONTROL (ONARILDI) ---
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            // Dokunma noktasını canvas ölçeğine göre hesapla
+            const scaleX = canvas.width / rect.width;
+            const touchX = (touch.clientX - rect.left) * scaleX;
+            paddle.x = touchX - (paddle.width / 2);
+            
+            // Sınır kontrolleri
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+        }, { passive: false });
 
         function drawAscom(x, y) {
             ctx.fillStyle = "#ff00ff";
@@ -171,8 +183,12 @@
             ctx.fillRect(paddle.x + 4, paddle.y, 16, 4);
             ctx.fillStyle = "#AAA"; ctx.fillRect(paddle.x + 20, paddle.y + 12, paddle.width - 20, 2);
 
-            paddle.x += paddle.dx;
-            paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
+            // PC için DX hareketi (Dokunmatik doğrudan X'i güncelliyor)
+            if (paddle.dx !== 0) {
+                paddle.x += paddle.dx;
+                if (paddle.x < 0) paddle.x = 0;
+                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            }
 
             patients.forEach((p, i) => {
                 const zone = canvas.height * 0.45;
@@ -236,23 +252,14 @@
             document.getElementById('over-title').innerText = reason;
             finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>MOD: ${difficultySettings[difficulty].tr}`;
             overlay.style.display = 'flex';
-            let hs = JSON.parse(localStorage.getItem('triyaj_hs') || '[]');
-            hs.push({score, diff: difficultySettings[difficulty].tr});
-            hs.sort((a,b)=>b.score-a.score);
-            localStorage.setItem('triyaj_hs', JSON.stringify(hs.slice(0,3)));
-            renderHS();
-        }
-
-        function renderHS() {
-            const hs = JSON.parse(localStorage.getItem('triyaj_hs') || '[]');
-            document.getElementById('hsList').innerHTML = hs.map((s,i)=>`<div class="hs-row"><span>${i+1}. ${s.diff}</span><span>${s.score} P</span></div>`).join('');
         }
 
         function resetGame() { endGame(); setTimeout(startGame, 100); }
-        function setDifficulty(l) { 
-            if (gameRunning) return; difficulty = l;
+        
+        function setDifficulty(lvl) { 
+            if (gameRunning) return; difficulty = lvl;
             document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
-            event.target.classList.add('active-diff');
+            document.getElementById('btn-' + lvl).classList.add('active-diff');
         }
         
         function generateAndShare() {
@@ -262,13 +269,12 @@
             t.font = 'bold 32px Arial'; t.textAlign = 'center'; t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ ARCADE', 4, 4);
             t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ ARCADE', 0, 0); t.restore();
             t.fillStyle = '#ffcc00'; t.font = 'bold 100px Arial'; t.textAlign = 'center'; t.fillText(score, 250, 250);
-            t.fillStyle = '#ffffff'; t.font = '22px Arial'; t.fillText('ASCOM BUM!', 250, 340);
+            t.fillStyle = '#ffffff'; t.font = '22px Arial'; t.fillText('SKOR KARTI', 250, 340);
             tC.toBlob(blob => {
                 const f = new File([blob], 'triyaj.png', {type: 'image/png'});
-                if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Puanım: ${score}`, files: [f]});
+                if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
             });
         }
-        renderHS();
     </script>
 </body>
 </html>
