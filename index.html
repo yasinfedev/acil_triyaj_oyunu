@@ -3,31 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Dr. Yasin Yıldız Edition</title>
+    <title>Acil Triyaj Arcade - Ascom Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        :root { --sf-yellow: #ffcc00; --sf-orange: #ff4500; --dark-gray: #333; }
+        :root { --sf-yellow: #ffcc00; --sf-orange: #ff4500; --neon-pink: #ff00ff; }
         
         body {
             background-color: #1a1a1a;
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
-                url('https://acil42.com/wp-content/uploads/2026/05/Gemini_Generated_Image_6l5nw56l5nw56l5n.png'); 
-            background-size: cover; 
-            background-position: center;
-            background-attachment: fixed;
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start;
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px 0;
-            font-family: 'Press Start 2P', cursive; 
-            overflow-y: auto;
-            touch-action: none;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+            url('https://acil42.com/wp-content/uploads/2026/05/Gemini_Generated_Image_6l5nw56l5nw56l5n.png'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: white; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100vh; margin: 0; padding: 20px 0; font-family: 'Press Start 2P', cursive; touch-action: none;
         }
 
         .game-title {
@@ -36,7 +24,6 @@
             margin-bottom: 15px; transform: skew(-10deg); text-align: center;
         }
 
-        /* Akordiyon Stilleri */
         .accordion-wrapper { width: 95vw; max-width: 500px; margin-bottom: 10px; border: 2px solid #444; background: #222; }
         .accordion-header { width: 100%; background: #333; color: var(--sf-yellow); padding: 10px; font-size: 9px; border: none; cursor: pointer; font-family: 'Press Start 2P', cursive; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #111; color: #ccc; font-size: 8px; line-height: 1.6; }
@@ -49,22 +36,21 @@
         }
 
         canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-        .ui-top { display: flex; justify-content: space-between; padding: 10px; font-size: 9px; background: #222; border-bottom: 2px solid var(--sf-yellow); }
+        .ui-top { display: flex; justify-content: space-between; padding: 10px; font-size: 8px; background: #222; border-bottom: 2px solid var(--sf-yellow); }
 
         .pixel-btn {
             font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #000;
-            box-shadow: 2px 2px 0px #555; padding: 8px 10px; text-transform: uppercase; transition: 0.1s;
-            cursor: pointer; background: #eee; color: #000;
+            box-shadow: 2px 2px 0px #555; padding: 8px 10px; text-transform: uppercase; cursor: pointer; background: #eee; color: #000;
         }
-        .active-diff { border: 2px solid white !important; opacity: 1 !important; transform: scale(1.1); }
+        .active-diff { border-color: white !important; background: #333; color: white; transform: scale(1.1); }
         .bottom-controls { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; width: 95vw; max-width: 500px; justify-content: center; }
 
         #game-over-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
+            background: rgba(0, 0, 0, 0.95); display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 20; padding: 20px;
         }
-        .footer-credit { margin-top: 20px; font-size: 7px; color: #aaa; text-align: center; padding-bottom: 20px; }
+        .footer-credit { margin-top: 20px; font-size: 7px; color: #aaa; text-align: center; }
         .hs-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: #00e5ff; }
     </style>
 </head>
@@ -75,124 +61,91 @@
     <div class="accordion-wrapper">
         <button class="accordion-header" onclick="toggleAcc('howToPlay')">NASIL OYNANIR? ▼</button>
         <div id="howToPlay" class="accordion-content">
-            • Sağa/Sola hareketle hastaları yakala!<br><br>
-            • YEŞİL(+5), SARI(+10), KIRMIZI(+20)<br><br>
-            • SİYAH (EX) yakalarsan -15 PUAN!<br><br>
-            • <span style="color:var(--sf-orange)">DİKKAT:</span> Her 60 saniyede bir hız %10 artar!
+            • Hastaları sedyeye al! Yeşil, Sarı, Kırmızı Puan verir.<br>
+            • SİYAH (EX): Puan düşürür!<br>
+            • <span style="color:var(--neon-pink)">ASCOM CANAVARI (X):</span> 3 tane yakalarsan OYUN BİTER!
         </div>
     </div>
 
-    <div class="d-flex gap-2 mb-2">
-        <button id="sfxToggle" class="pixel-btn" onclick="btnClickSound(); toggleSFX()">EFEKT: AÇIK</button>
-        <button id="musicToggle" class="pixel-btn" onclick="btnClickSound(); toggleMusic()">MÜZİK: AÇIK</button>
-    </div>
-
     <div class="mb-3 d-flex gap-2">
-        <button id="btn-easy" class="pixel-btn btn-success active-diff" onclick="btnClickSound(); setDifficulty('easy')">KOLAY</button>
-        <button id="btn-medium" class="pixel-btn btn-warning" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('medium')">ORTA</button>
-        <button id="btn-hard" class="pixel-btn btn-danger" style="opacity:0.6" onclick="btnClickSound(); setDifficulty('hard')">ZOR</button>
+        <button id="btn-easy" class="pixel-btn active-diff" onclick="setDifficulty('easy')">KOLAY</button>
+        <button id="btn-medium" class="pixel-btn" onclick="setDifficulty('medium')">ORTA</button>
+        <button id="btn-hard" class="pixel-btn" onclick="setDifficulty('hard')">ZOR</button>
     </div>
 
     <div id="game-container">
         <div class="ui-top">
             <div style="color: #00e5ff;">SÜRE:<span id="timer">0</span></div>
+            <div style="color: var(--neon-pink);">ASCOM:<span id="ascom-count">0</span>/3</div>
             <div style="color: var(--sf-yellow);">PUAN:<span id="score">0</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
         <div id="game-over-overlay">
-            <div class="game-title" style="font-size: 16px;">OYUN BİTTİ</div>
+            <div class="game-title" id="over-title">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2; text-align: center;"></div>
-            <button class="pixel-btn w-75 mb-2" onclick="btnClickSound(); resetGame()">TEKRAR DENE</button>
-            <button class="pixel-btn w-75" style="background: linear-gradient(to bottom, #ffcc00, #ff4500); color:white;" onclick="btnClickSound(); generateAndShare()">PAYLAŞ 📱</button>
+            <button class="pixel-btn w-75 mb-2" onclick="resetGame()">TEKRAR DENE</button>
+            <button class="pixel-btn btn-sf w-75" style="color:white; background: linear-gradient(to bottom, #ffcc00, #ff4500);" onclick="generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
 
     <div class="bottom-controls">
-        <button id="startBtn" class="pixel-btn" style="border-color: #00FF00" onclick="startGame()">BAŞLA</button>
-        <button id="endBtn" class="pixel-btn" style="border-color: #FF0000" onclick="btnClickSound(); endGame()">BİTİR</button>
-        <button id="restartBtn" class="pixel-btn" style="border-color: #00e5ff" onclick="btnClickSound(); resetGame()">RESTART</button>
+        <button id="startBtn" class="pixel-btn" style="background:#28a745; color:white;" onclick="startGame()">BAŞLA</button>
+        <button id="endBtn" class="pixel-btn" style="background:#dc3545; color:white;" onclick="endGame()">BİTİR</button>
+        <button class="pixel-btn" onclick="resetGame()">RESTART</button>
     </div>
 
     <div class="accordion-wrapper" style="margin-top:15px;">
         <button class="accordion-header" onclick="toggleAcc('highScores')">TOP 3 SKORLAR ▼</button>
-        <div id="highScores" class="accordion-content">
-            <div id="hsList">Henüz skor kaydedilmedi.</div>
-        </div>
+        <div id="highScores" class="accordion-content"><div id="hsList">Henüz skor yok.</div></div>
     </div>
 
-    <div class="footer-credit">
-        Geliştirici Uzm.Dr.Yasin Yıldız © 2026<br>Tüm hakları saklıdır. v1.26
-    </div>
+    <div class="footer-credit">Geliştirici Uzm.Dr.Yasin Yıldız (c) 2026</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const timerEl = document.getElementById('timer');
+        const ascomEl = document.getElementById('ascom-count');
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
 
-        let score = 0, time = 0, gameRunning = false, sfxEnabled = true, musicEnabled = true;
-        let patients = [], animationId, timerInterval, musicInterval;
+        let score = 0, time = 0, ascomCount = 0, gameRunning = false;
+        let patients = [], animationId, timerInterval;
         let difficulty = 'easy';
-        let speedMultiplier = 1.0; // Her 60sn'de artacak çarpan
-        let paddle = { width: 80, height: 16, x: 0, y: 0, speed: 16, dx: 0 };
+        let speedMultiplier = 1.0;
+        let paddle = { width: 85, height: 16, x: 0, y: 0, speed: 16, dx: 0 };
 
         const difficultySettings = { 
-            easy: { blackChance: 0.002, tr: 'KOLAY' }, 
-            medium: { blackChance: 0.01, tr: 'ORTA' }, 
-            hard: { blackChance: 0.025, tr: 'ZOR' } 
+            easy: { blackChance: 0.002, ascomChance: 0.0005, tr: 'KOLAY' }, 
+            medium: { blackChance: 0.01, ascomChance: 0.002, tr: 'ORTA' }, 
+            hard: { blackChance: 0.025, ascomChance: 0.005, tr: 'ZOR' } 
         };
 
         const patientTypes = {
             GREEN: { color: '#00FF00', speed: 2.3, points: 5 },
             YELLOW: { color: '#FFFF00', speed: 3.8, points: 10 },
             RED: { color: '#FF0000', speed: 5.8, points: 20 },
-            BLACK: { color: '#333333', speed: 4.8, points: -15 }
+            BLACK: { color: '#333333', speed: 4.8, points: -15 },
+            ASCOM: { color: '#ff00ff', speed: 6.5, points: 0 }
         };
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSnd(f, t, d, v) {
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        }
 
         function toggleAcc(id) { document.getElementById(id).classList.toggle('open'); }
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playNote(freq, type, duration, vol) {
-            if (!sfxEnabled && (type === 'square' || type === 'sawtooth')) return;
-            if (!musicEnabled && type === 'triangle') return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-        function btnClickSound() { playNote(400, 'square', 0.05, 0.05); }
-
-        function startMusic() {
-            if (musicInterval) clearInterval(musicInterval);
-            const melody = [261, 329, 392, 523, 392, 329]; let step = 0;
-            musicInterval = setInterval(() => {
-                if (gameRunning && musicEnabled) {
-                    playNote(melody[step % melody.length], 'triangle', 0.4, 0.03);
-                    step++;
-                }
-            }, 250);
-        }
-
-        function drawPixelStretcher(x, y, w, h) {
-            ctx.fillStyle = "#FFF"; ctx.fillRect(x + 20, y + 4, w - 20, 8); ctx.fillRect(x + 4, y, 16, 4);
-            ctx.fillStyle = "#AAA"; ctx.fillRect(x + 20, y + 12, w - 20, 2);
-            ctx.fillStyle = "#555"; ctx.fillRect(x + 24, y + 14, 6, 6); ctx.fillRect(x + w - 12, y + 14, 6, 6);
-        }
-
-        function drawPixelPerson(x, y, color, isEx) {
-            ctx.fillStyle = color; ctx.fillRect(x + 8, y, 12, 12); ctx.fillRect(x, y + 12, 28, 24);
-            if(isEx) { ctx.fillStyle = "#FFF"; ctx.font = "bold 14px Arial"; ctx.fillText("X", x + 8, y + 30); }
-        }
-
         function resizeCanvas() {
-            const containerW = document.getElementById('game-container').clientWidth;
-            canvas.width = containerW; canvas.height = window.innerHeight * 0.45;
-            paddle.y = canvas.height - 70; paddle.x = (canvas.width / 2) - 40;
+            canvas.width = document.getElementById('game-container').clientWidth;
+            canvas.height = window.innerHeight * 0.45;
+            paddle.y = canvas.height - 70; paddle.x = (canvas.width / 2) - 42;
         }
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
@@ -202,98 +155,120 @@
         });
         document.addEventListener('keyup', () => paddle.dx = 0);
 
-        canvas.addEventListener('touchmove', e => {
-            e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect();
-            paddle.x = (touch.clientX - rect.left) * (canvas.width / rect.width) - 40;
-            paddle.x = Math.max(0, Math.min(canvas.width - 80, paddle.x));
-        }, { passive: false });
+        function drawAscom(x, y) {
+            ctx.fillStyle = "#ff00ff";
+            ctx.font = "bold 30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("X", x + 15, y + 30);
+        }
 
         function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawPixelStretcher(paddle.x, paddle.y, paddle.width, paddle.height);
-            paddle.x += paddle.dx; paddle.x = Math.max(0, Math.min(canvas.width - 80, paddle.x));
+            
+            // Sedye Çizimi
+            ctx.fillStyle = "#FFF"; ctx.fillRect(paddle.x + 20, paddle.y + 4, paddle.width - 20, 8);
+            ctx.fillRect(paddle.x + 4, paddle.y, 16, 4);
+            ctx.fillStyle = "#AAA"; ctx.fillRect(paddle.x + 20, paddle.y + 12, paddle.width - 20, 2);
+
+            paddle.x += paddle.dx;
+            paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
 
             patients.forEach((p, i) => {
-                if (!p.isBlack && p.y > canvas.height * 0.4 && Math.random() < difficultySettings[difficulty].blackChance) {
-                    p.isBlack = true; p.type = { ...patientTypes.BLACK };
+                const zone = canvas.height * 0.45;
+                if (!p.isAscom && !p.isBlack && p.y > zone) {
+                    let roll = Math.random();
+                    if (roll < difficultySettings[difficulty].ascomChance) {
+                        p.isAscom = true; p.type = patientTypes.ASCOM;
+                    } else if (roll < difficultySettings[difficulty].blackChance) {
+                        p.isBlack = true; p.type = patientTypes.BLACK;
+                    }
                 }
-                drawPixelPerson(p.x, p.y, p.type.color, p.isBlack);
-                p.y += p.type.speed * speedMultiplier; // Çarpan uygulandı
 
-                if (p.y + 30 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + 80) {
-                    playNote(p.isBlack ? 150 : 600, 'square', 0.1, 0.1);
-                    score += p.type.points; scoreEl.innerText = score; patients.splice(i, 1);
+                if (p.isAscom) drawAscom(p.x, p.y);
+                else {
+                    ctx.fillStyle = p.type.color;
+                    ctx.fillRect(p.x + 8, p.y, 12, 12);
+                    ctx.fillRect(p.x, p.y + 12, 28, 24);
+                    if(p.isBlack) { ctx.fillStyle = "#FFF"; ctx.font = "14px Arial"; ctx.fillText("X", p.x + 8, p.y + 30); }
+                }
+
+                p.y += p.type.speed * speedMultiplier;
+
+                if (p.y + 30 > paddle.y && p.x + 25 > paddle.x && p.x < paddle.x + paddle.width) {
+                    if (p.isAscom) {
+                        ascomCount++;
+                        ascomEl.innerText = ascomCount;
+                        playSnd(1200, 'sawtooth', 0.5, 0.2);
+                        if (ascomCount >= 3) { endGame("ASCOM BUM!"); return; }
+                    } else {
+                        playSnd(p.isBlack ? 150 : 600, 'square', 0.1, 0.1);
+                        score += p.type.points;
+                        scoreEl.innerText = score;
+                    }
+                    patients.splice(i, 1);
                 }
                 if (p.y > canvas.height) patients.splice(i, 1);
             });
             animationId = requestAnimationFrame(update);
         }
 
-        function spawn() {
-            if (!gameRunning) return;
-            const keys = ['GREEN', 'YELLOW', 'RED'];
-            patients.push({ x: Math.random() * (canvas.width - 30), y: -50, type: { ...patientTypes[keys[Math.floor(Math.random() * 3)]] }, isBlack: false });
-            setTimeout(spawn, 1000);
-        }
-
         function startGame() {
             if (gameRunning) return; if (audioCtx.state === 'suspended') audioCtx.resume();
-            gameRunning = true; score = 0; time = 0; speedMultiplier = 1.0; patients = []; overlay.style.display = 'none';
+            gameRunning = true; score = 0; time = 0; ascomCount = 0; speedMultiplier = 1.0;
+            patients = []; scoreEl.innerText = "0"; timerEl.innerText = "0"; ascomEl.innerText = "0";
+            overlay.style.display = 'none';
             timerInterval = setInterval(() => { 
-                time++; 
-                timerEl.innerText = time;
-                // Her 60 saniyede bir hız artışı
-                if (time > 0 && time % 60 === 0) {
-                    speedMultiplier += 0.1;
-                    if(sfxEnabled) playNote(1000, 'square', 0.5, 0.1); // Hız artışı sesi
-                }
+                time++; timerEl.innerText = time;
+                if (time % 60 === 0) speedMultiplier += 0.1;
             }, 1000);
-            startMusic(); spawn(); update();
+            const spawn = () => { if (gameRunning) { 
+                const keys = ['GREEN', 'YELLOW', 'RED'];
+                patients.push({ x: Math.random() * (canvas.width - 30), y: -50, type: patientTypes[keys[Math.floor(Math.random()*3)]], isBlack: false, isAscom: false });
+                setTimeout(spawn, 1000);
+            }};
+            spawn(); update();
         }
 
-        function endGame() {
-            if (!gameRunning) return; gameRunning = false; clearInterval(timerInterval); cancelAnimationFrame(animationId);
+        function endGame(reason = "OYUN BİTTİ") {
+            if (!gameRunning) return; gameRunning = false;
+            clearInterval(timerInterval); cancelAnimationFrame(animationId);
+            document.getElementById('over-title').innerText = reason;
             finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>MOD: ${difficultySettings[difficulty].tr}`;
-            overlay.style.display = 'flex'; saveHighScore();
+            overlay.style.display = 'flex';
+            let hs = JSON.parse(localStorage.getItem('triyaj_hs') || '[]');
+            hs.push({score, diff: difficultySettings[difficulty].tr});
+            hs.sort((a,b)=>b.score-a.score);
+            localStorage.setItem('triyaj_hs', JSON.stringify(hs.slice(0,3)));
+            renderHS();
+        }
+
+        function renderHS() {
+            const hs = JSON.parse(localStorage.getItem('triyaj_hs') || '[]');
+            document.getElementById('hsList').innerHTML = hs.map((s,i)=>`<div class="hs-row"><span>${i+1}. ${s.diff}</span><span>${s.score} P</span></div>`).join('');
         }
 
         function resetGame() { endGame(); setTimeout(startGame, 100); }
-
-        function setDifficulty(lvl) {
-            if (gameRunning) return; difficulty = lvl;
-            document.querySelectorAll('.mb-3 .pixel-btn').forEach(b => { b.classList.remove('active-diff'); b.style.opacity = "0.6"; });
-            const active = document.getElementById('btn-' + lvl); active.classList.add('active-diff'); active.style.opacity = "1";
+        function setDifficulty(l) { 
+            if (gameRunning) return; difficulty = l;
+            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
+            event.target.classList.add('active-diff');
         }
-
+        
         function generateAndShare() {
             const tC = document.createElement('canvas'); const t = tC.getContext('2d'); tC.width = 500; tC.height = 550;
             t.fillStyle = '#1a1a1a'; t.fillRect(0, 0, 500, 550);
             t.save(); t.translate(250, 80); t.rotate(-0.05);
-            t.font = 'bold 32px Arial Black'; t.textAlign = 'center'; t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ ARCADE', 4, 4);
+            t.font = 'bold 32px Arial'; t.textAlign = 'center'; t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ ARCADE', 4, 4);
             t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ ARCADE', 0, 0); t.restore();
             t.fillStyle = '#ffcc00'; t.font = 'bold 100px Arial'; t.textAlign = 'center'; t.fillText(score, 250, 250);
-            t.fillStyle = '#ffffff'; t.font = '22px Courier New'; t.fillText('ARCADE SKORU', 250, 340);
-            t.fillStyle = '#3498db'; t.fillText(`${time} SANİYE - ${difficultySettings[difficulty].tr}`, 250, 420);
+            t.fillStyle = '#ffffff'; t.font = '22px Arial'; t.fillText('ASCOM BUM!', 250, 340);
             tC.toBlob(blob => {
                 const f = new File([blob], 'triyaj.png', {type: 'image/png'});
-                if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
-                else { const a = document.createElement('a'); a.download = 'score.png'; a.href = tC.toDataURL(); a.click(); }
+                if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Puanım: ${score}`, files: [f]});
             });
         }
-
-        function saveHighScore() {
-            let scores = JSON.parse(localStorage.getItem('triyaj_highscores') || '[]');
-            if (score > 0) { scores.push({ score, diff: difficultySettings[difficulty].tr }); scores.sort((a, b) => b.score - a.score); scores = scores.slice(0, 3); localStorage.setItem('triyaj_highscores', JSON.stringify(scores)); }
-            renderScores();
-        }
-        function renderScores() {
-            const scores = JSON.parse(localStorage.getItem('triyaj_highscores') || '[]'); const list = document.getElementById('hsList');
-            if(scores.length > 0) list.innerHTML = scores.map((s, i) => `<div class="hs-row"><span>${i+1}. ${s.diff}</span><span>${s.score} P</span></div>`).join('');
-        }
-        renderScores();
-        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `EFEKT: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
-        function toggleMusic() { musicEnabled = !musicEnabled; document.getElementById('musicToggle').innerText = `MÜZİK: ${musicEnabled ? 'AÇIK' : 'KAPALI'}`; }
+        renderHS();
     </script>
 </body>
 </html>
