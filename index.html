@@ -3,59 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acil Triyaj Arcade - Touch Fix</title>
+    <title>Acil Triyaj Arcade - Final Fix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { --sf-yellow: #ffcc00; --sf-orange: #ff4500; --neon-pink: #ff00ff; }
-        
         body {
             background-color: #1a1a1a;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
             url('https://acil42.com/wp-content/uploads/2026/05/Gemini_Generated_Image_6l5nw56l5nw56l5n.png'); 
             background-size: cover; background-position: center; background-attachment: fixed;
             color: white; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             min-height: 100vh; margin: 0; padding: 20px 0; font-family: 'Press Start 2P', cursive;
-            overflow-x: hidden;
-            /* Mobilde sayfa kaydırmayı engelle */
-            touch-action: none; 
+            overflow-x: hidden; touch-action: none; 
         }
-
-        .game-title {
-            font-size: 18px; font-style: italic; color: var(--sf-yellow);
-            text-shadow: 3px 3px 0px var(--sf-orange), 5px 5px 0px #000;
-            margin-bottom: 15px; transform: skew(-10deg); text-align: center;
-        }
-
+        .game-title { font-size: 18px; font-style: italic; color: var(--sf-yellow); text-shadow: 3px 3px 0px var(--sf-orange); margin-bottom: 15px; text-align: center; }
         .accordion-wrapper { width: 95vw; max-width: 500px; margin-bottom: 10px; border: 2px solid #444; background: #222; }
         .accordion-header { width: 100%; background: #333; color: var(--sf-yellow); padding: 10px; font-size: 9px; border: none; cursor: pointer; font-family: 'Press Start 2P', cursive; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #111; color: #ccc; font-size: 8px; line-height: 1.6; }
-        .accordion-content.open { max-height: 300px; padding: 15px; border-top: 1px solid #444; }
-
-        #game-container {
-            position: relative; border: 4px solid var(--sf-yellow); border-radius: 4px;
-            background-color: rgba(0, 0, 0, 0.9); width: 95vw; max-width: 500px;
-            box-shadow: 0 0 20px var(--sf-orange); z-index: 10;
-            /* Mobilde dokunmatik alanın dışına taşmayı engelle */
-            touch-action: none;
-        }
-
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #111; font-size: 8px; }
+        .accordion-content.open { max-height: 400px; padding: 15px; border-top: 1px solid #444; }
+        #game-container { position: relative; border: 4px solid var(--sf-yellow); background-color: rgba(0, 0, 0, 0.9); width: 95vw; max-width: 500px; touch-action: none; }
         canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; touch-action: none; }
         .ui-top { display: flex; justify-content: space-between; padding: 10px; font-size: 8px; background: #222; border-bottom: 2px solid var(--sf-yellow); }
-
-        .pixel-btn {
-            font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #000;
-            box-shadow: 2px 2px 0px #555; padding: 8px 10px; text-transform: uppercase; cursor: pointer; background: #eee; color: #000;
-        }
+        .pixel-btn { font-family: 'Press Start 2P', cursive; font-size: 8px; border: 2px solid #000; box-shadow: 2px 2px 0px #555; padding: 8px 10px; cursor: pointer; background: #eee; color: #000; }
         .active-diff { border-color: white !important; background: #333; color: white; transform: scale(1.1); }
         .bottom-controls { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; width: 95vw; max-width: 500px; justify-content: center; }
-
-        #game-over-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 20; padding: 20px;
-        }
-        .footer-credit { margin-top: 20px; font-size: 7px; color: #aaa; text-align: center; }
+        #game-over-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
+        .hs-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: #00e5ff; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -65,9 +39,16 @@
     <div class="accordion-wrapper">
         <button class="accordion-header" onclick="toggleAcc('howToPlay')">NASIL OYNANIR? ▼</button>
         <div id="howToPlay" class="accordion-content">
-            • Hastaları sedyeye al!<br>
-            • <span style="color:var(--neon-pink)">ASCOM (X):</span> 3 tane yakalarsan OYUN BİTER!
+            • Hastaları yakala! Yeşil, Sarı, Kırmızı puan verir.<br><br>
+            • <span style="color:var(--neon-pink)">ASCOM (X):</span> 3 tane yakalarsan OYUN BİTER!<br><br>
+            • Her 60 saniyede hız %10 artar!
         </div>
+    </div>
+
+    <!-- Müzik ve Ses Butonları (1. Madde Geri Geldi) -->
+    <div class="d-flex gap-2 mb-2">
+        <button id="sfxToggle" class="pixel-btn" onclick="toggleSFX()">EFEKT: AÇIK</button>
+        <button id="musicToggle" class="pixel-btn" onclick="toggleMusic()">MÜZİK: AÇIK</button>
     </div>
 
     <div class="mb-3 d-flex gap-2">
@@ -87,7 +68,7 @@
             <div class="game-title" id="over-title">OYUN BİTTİ</div>
             <div id="final-result" class="mb-4" style="font-size: 10px; line-height: 2; text-align: center;"></div>
             <button class="pixel-btn w-75 mb-2" onclick="resetGame()">TEKRAR DENE</button>
-            <button class="pixel-btn btn-sf w-75" style="color:white; background: linear-gradient(to bottom, #ffcc00, #ff4500);" onclick="generateAndShare()">PAYLAŞ 📱</button>
+            <button class="pixel-btn w-75" style="color:white; background: linear-gradient(to bottom, #ffcc00, #ff4500);" onclick="generateAndShare()">PAYLAŞ 📱</button>
         </div>
     </div>
 
@@ -97,7 +78,15 @@
         <button class="pixel-btn" onclick="resetGame()">RESTART</button>
     </div>
 
-    <div class="footer-credit">Geliştirici Uzm.Dr.Yasin Yıldız (c) 2026</div>
+    <!-- Top 5 Skor Bölümü (2. Madde Geri Geldi) -->
+    <div class="accordion-wrapper" style="margin-top:15px;">
+        <button class="accordion-header" onclick="toggleAcc('highScores')">TOP 5 SKORLAR ▼</button>
+        <div id="highScores" class="accordion-content">
+            <div id="hsList">Henüz skor kaydedilmedi.</div>
+        </div>
+    </div>
+
+    <div class="footer-credit" style="font-size:7px; color:#aaa; margin-top:20px;">Uzm.Dr.Yasin Yıldız (c) 2026</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -108,8 +97,8 @@
         const overlay = document.getElementById('game-over-overlay');
         const finalResultEl = document.getElementById('final-result');
 
-        let score = 0, time = 0, ascomCount = 0, gameRunning = false;
-        let patients = [], animationId, timerInterval;
+        let score = 0, time = 0, ascomCount = 0, gameRunning = false, sfxEnabled = true, musicEnabled = true;
+        let patients = [], animationId, timerInterval, musicInterval;
         let difficulty = 'easy';
         let speedMultiplier = 1.0;
         let paddle = { width: 85, height: 16, x: 0, y: 0, speed: 18, dx: 0 };
@@ -128,8 +117,10 @@
             ASCOM: { color: '#ff00ff', speed: 6.5, points: 0 }
         };
 
+        // --- SES VE MÜZİK SİSTEMİ ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSnd(f, t, d, v) {
+            if ((!sfxEnabled && t !== 'triangle') || (!musicEnabled && t === 'triangle')) return;
             try {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
                 const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
@@ -141,77 +132,60 @@
             } catch(e) {}
         }
 
+        function startMusic() {
+            if (musicInterval) clearInterval(musicInterval);
+            const melody = [261, 329, 392, 523, 392, 329]; let step = 0;
+            musicInterval = setInterval(() => {
+                if (gameRunning && musicEnabled) {
+                    playSnd(melody[step % melody.length], 'triangle', 0.4, 0.03);
+                    step++;
+                }
+            }, 250);
+        }
+
+        function toggleSFX() { sfxEnabled = !sfxEnabled; document.getElementById('sfxToggle').innerText = `EFEKT: ${sfxEnabled ? 'AÇIK' : 'KAPALI'}`; }
+        function toggleMusic() { musicEnabled = !musicEnabled; document.getElementById('musicToggle').innerText = `MÜZİK: ${musicEnabled ? 'AÇIK' : 'KAPALI'}`; }
         function toggleAcc(id) { document.getElementById(id).classList.toggle('open'); }
 
+        // --- OYUN ALANI ---
         function resizeCanvas() {
             canvas.width = document.getElementById('game-container').clientWidth;
             canvas.height = window.innerHeight * 0.45;
-            paddle.y = canvas.height - 70; 
-            paddle.x = (canvas.width / 2) - (paddle.width / 2);
+            paddle.y = canvas.height - 70; paddle.x = (canvas.width / 2) - 42;
         }
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
-        // PC Klavye
-        document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') paddle.dx = -paddle.speed;
-            if (e.key === 'ArrowRight' || e.key === 'd') paddle.dx = paddle.speed;
-        });
-        document.addEventListener('keyup', () => paddle.dx = 0);
-
-        // MOBİL DOKUNMATİK (GELİŞTİRİLMİŞ)
+        // Dokunmatik Fix
         function handleTouch(e) {
             if (!gameRunning) return;
             e.preventDefault();
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            // Canvas ölçekleme oranını hesapla
             const scaleX = canvas.width / rect.width;
-            const touchX = (touch.clientX - rect.left) * scaleX;
-            // Sedyeyi merkeze al
-            paddle.x = touchX - (paddle.width / 2);
-            // Sınırlar
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x > canvas.width - paddle.width) paddle.x = canvas.width - paddle.width;
+            paddle.x = (touch.clientX - rect.left) * scaleX - (paddle.width / 2);
+            paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
         }
-
         canvas.addEventListener('touchstart', handleTouch, { passive: false });
         canvas.addEventListener('touchmove', handleTouch, { passive: false });
-
-        function drawAscom(x, y) {
-            ctx.fillStyle = "#ff00ff";
-            ctx.font = "bold 30px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("X", x + 15, y + 30);
-        }
 
         function update() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Sedye
             ctx.fillStyle = "#FFF"; ctx.fillRect(paddle.x + 20, paddle.y + 4, paddle.width - 20, 8);
             ctx.fillRect(paddle.x + 4, paddle.y, 16, 4);
             ctx.fillStyle = "#AAA"; ctx.fillRect(paddle.x + 20, paddle.y + 12, paddle.width - 20, 2);
 
-            // Klavye Hareketi
-            if(paddle.dx !== 0) {
-                paddle.x += paddle.dx;
-                if (paddle.x < 0) paddle.x = 0;
-                if (paddle.x > canvas.width - paddle.width) paddle.x = canvas.width - paddle.width;
-            }
-
             patients.forEach((p, i) => {
-                if (!p.isAscom && !p.isBlack && p.y > canvas.height * 0.4) {
+                if (!p.isAscom && !p.isBlack && p.y > canvas.height * 0.45) {
                     let roll = Math.random();
                     if (roll < difficultySettings[difficulty].ascomChance) { p.isAscom = true; p.type = patientTypes.ASCOM; }
                     else if (roll < difficultySettings[difficulty].blackChance) { p.isBlack = true; p.type = patientTypes.BLACK; }
                 }
 
-                if (p.isAscom) drawAscom(p.x, p.y);
-                else {
-                    ctx.fillStyle = p.type.color;
-                    ctx.fillRect(p.x + 8, p.y, 12, 12);
-                    ctx.fillRect(p.x, p.y + 12, 28, 24);
+                if (p.isAscom) {
+                    ctx.fillStyle = "#ff00ff"; ctx.font = "bold 30px Arial"; ctx.textAlign = "center"; ctx.fillText("X", p.x + 15, p.y + 30);
+                } else {
+                    ctx.fillStyle = p.type.color; ctx.fillRect(p.x + 8, p.y, 12, 12); ctx.fillRect(p.x, p.y + 12, 28, 24);
                     if(p.isBlack) { ctx.fillStyle = "#FFF"; ctx.font = "14px Arial"; ctx.fillText("X", p.x + 8, p.y + 30); }
                 }
 
@@ -235,13 +209,14 @@
 
         function startGame() {
             if (gameRunning) return; if (audioCtx.state === 'suspended') audioCtx.resume();
-            gameRunning = true; score = 0; time = 0; ascomCount = 0; speedMultiplier = 1.0;
-            patients = []; scoreEl.innerText = "0"; timerEl.innerText = "0"; ascomEl.innerText = "0";
+            gameRunning = true; score = 0; time = 0; ascomCount = 0; speedMultiplier = 1.0; patients = [];
+            scoreEl.innerText = "0"; timerEl.innerText = "0"; ascomEl.innerText = "0";
             overlay.style.display = 'none';
             timerInterval = setInterval(() => { 
                 time++; timerEl.innerText = time;
                 if (time % 60 === 0) speedMultiplier += 0.1;
             }, 1000);
+            startMusic();
             const spawn = () => { if (gameRunning) { 
                 const keys = ['GREEN', 'YELLOW', 'RED'];
                 patients.push({ x: Math.random() * (canvas.width - 30), y: -50, type: patientTypes[keys[Math.floor(Math.random()*3)]], isBlack: false, isAscom: false });
@@ -252,31 +227,59 @@
 
         function endGame(reason = "OYUN BİTTİ") {
             if (!gameRunning) return; gameRunning = false;
-            clearInterval(timerInterval); cancelAnimationFrame(animationId);
+            clearInterval(timerInterval); clearInterval(musicInterval); cancelAnimationFrame(animationId);
             document.getElementById('over-title').innerText = reason;
-            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn`;
+            finalResultEl.innerHTML = `PUAN: ${score}<br>SÜRE: ${time}sn<br>MOD: ${difficultySettings[difficulty].tr}`;
             overlay.style.display = 'flex';
+            saveScore();
         }
 
-        function resetGame() { endGame(); setTimeout(startGame, 100); }
-        function setDifficulty(lvl) { 
-            if (gameRunning) return; difficulty = lvl;
-            document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('active-diff'));
-            document.getElementById('btn-' + lvl).classList.add('active-diff');
+        // --- SKOR VE PAYLAŞIM (3. Madde Geri Geldi) ---
+        function saveScore() {
+            let hs = JSON.parse(localStorage.getItem('triyaj_top5') || '[]');
+            if (score > 0) {
+                hs.push({score, diff: difficultySettings[difficulty].tr, time});
+                hs.sort((a,b)=>b.score-a.score);
+                hs = hs.slice(0,5);
+                localStorage.setItem('triyaj_top5', JSON.stringify(hs));
+            }
+            renderHS();
         }
-        
+
+        function renderHS() {
+            const hs = JSON.parse(localStorage.getItem('triyaj_top5') || '[]');
+            document.getElementById('hsList').innerHTML = hs.map((s,i)=>`
+                <div class="hs-row">
+                    <span>${i+1}. ${s.diff} (${s.time}s)</span>
+                    <span>${s.score} P</span>
+                </div>
+            `).join('') || 'Henüz skor yok.';
+        }
+
         function generateAndShare() {
             const tC = document.createElement('canvas'); const t = tC.getContext('2d'); tC.width = 500; tC.height = 550;
             t.fillStyle = '#1a1a1a'; t.fillRect(0, 0, 500, 550);
             t.save(); t.translate(250, 80); t.rotate(-0.05);
-            t.font = 'bold 32px Arial'; t.textAlign = 'center'; t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ ARCADE', 4, 4);
+            t.font = 'bold 34px Arial'; t.textAlign = 'center'; t.fillStyle = '#ff4500'; t.fillText('ACİL TRİYAJ ARCADE', 4, 4);
             t.fillStyle = '#ffcc00'; t.fillText('ACİL TRİYAJ ARCADE', 0, 0); t.restore();
             t.fillStyle = '#ffcc00'; t.font = 'bold 100px Arial'; t.textAlign = 'center'; t.fillText(score, 250, 250);
+            // Skor kartına süre ve mod bilgisi eklendi (3. Madde Fix)
+            t.fillStyle = '#ffffff'; t.font = '22px Arial'; t.fillText(`${time} SN - ${difficultySettings[difficulty].tr.toUpperCase()}`, 250, 320);
+            t.fillStyle = '#777'; t.font = '12px Arial'; t.fillText('Uzm.Dr.Yasin Yıldız (c) 2026', 250, 510);
             tC.toBlob(blob => {
                 const f = new File([blob], 'triyaj.png', {type: 'image/png'});
                 if (navigator.share) navigator.share({title: 'Triyaj Arcade', text: `Skorum: ${score}`, files: [f]});
             });
         }
+
+        function resetGame() { endGame(); setTimeout(startGame, 100); }
+        function setDifficulty(lvl) { 
+            if (gameRunning) return; difficulty = lvl;
+            document.querySelectorAll('.mb-3 .pixel-btn').forEach(b => b.classList.remove('active-diff'));
+            document.getElementById('btn-' + lvl).classList.add('active-diff');
+        }
+
+        renderHS();
     </script>
 </body>
 </html>
